@@ -12,30 +12,30 @@ const MONTH_LABEL = "September 2026";
 const MONTHLY_PICKS = [
   {
     rank: 1,
-    game: "Fractured Throne",
-    genre: "Strategy",
+    game: "Onimusha: Way of the Sword",
+    genre: "Action-Adventure / Single Player / Sword / Gore",
     platforms: "PC, PS5, Xbox Series X|S",
-    poster: "/images/games/fractured-throne.jpg",
+    poster: "/images/games/onimusha-way-of-the-sword.png",
     blurb:
-      "The comeback strategy game of the year — deep systems, no fluff. Every match feels different, and the faction design finally makes asymmetric multiplayer feel fair.",
+      "Onimusha: Way of the Sword is a 2026 dark fantasy action-adventure game developed by Capcom where a resurrected Miyamoto Musashi fights demonic invaders in Edo-period Kyoto.",
   },
   {
     rank: 2,
-    game: "Lumen Fields",
-    genre: "Co-op / Action",
-    platforms: "PC, PS5",
-    poster: "/images/games/lumen-fields.jpg",
+    game: "Control Resonant",
+    genre: "Hack and Slash / Action RPG / Story Rich / Lore-Rich / Sci-Fi",
+    platforms: "PC, PS5, Xbox Series X|S",
+    poster: "/images/games/control-resonant.png",
     blurb:
-      "Best co-op I've played this month, hands down. A two-player campaign that actually respects both players' time and skill level.",
+      "Control Resonant follows Dylan Faden as he awakens from a seven-year coma to fight a reality-warping Hiss invasion across a fractured Manhattan while searching for his missing sister, Jesse Faden.",
   },
   {
     rank: 3,
-    game: "Ember Circuit",
-    genre: "Racing",
-    platforms: "PC, Switch",
-    poster: "/images/games/ember-circuit.jpg",
+    game: "Marvel's Wolverine",
+    genre: "Action-Adventure / Single Player / Superhero",
+    platforms: "PlayStation 5 Exclusive",
+    poster: "/images/games/marvels-wolverine.png",
     blurb:
-      "A tight 6-hour campaign that respects your time. Arcade handling with just enough depth to keep tuning your car for another hour.",
+      "Marvel's Wolverine is a 2026 action-adventure game developed by Insomniac Games where players control the iconic Marvel character in a story-driven campaign.",
   },
 ];
 
