@@ -1,31 +1,9 @@
+import { ORIGINALS_VIDEOS, WEBSITE_EXCLUSIVES } from "@/lib/data/originals";
+
 export const metadata = {
   title: "Originals — Maverick Drills",
   description: "Selected videos from the Maverick Drills YouTube channel.",
 };
-
-const ORIGINALS_VIDEOS = [
-  {
-    id: "UmRTKd_E1IU",
-    title: "Batman Arkham Knight X In The End | Maverick Drills",
-  },
-  {
-    id: "AMgimFwv2iA",
-    title: "MARVEL'S SPIDERMAN REMASTERED X ENEMY | Maverick Drills",
-  },
-  {
-    id: "_mi1IdfujTI",
-    title: "NUKETOWN'84 Stunning gameplay(literally) | Maverick Drills",
-  },
-  {
-    id: "ppw462LgdyA",
-    title: "Batman vs Deathstroke | Batman arkham origins | Maverick Drills",
-  },
-];
-
-const WEBSITE_EXCLUSIVES = [
-  { src: "/videos/exclusives/Video1.mp4", title: "Spiderman: Miles Morales" },
-  { src: "/videos/exclusives/Video2.mp4", title: "Forza Horizon 4" },
-];
 
 export default function OriginalsPage() {
   return (

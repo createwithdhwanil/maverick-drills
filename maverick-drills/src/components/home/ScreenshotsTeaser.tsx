@@ -1,14 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
-
-// TODO: replace with real screenshots once the Gallery/data layer is built
-const FEATURED_SCREENSHOTS = [
-  { game: "Iron Echelon", caption: "Final boss arena reveal" },
-  { game: "Neon Drift", caption: "Night city chase sequence" },
-  { game: "Void Runners", caption: "Zero-g combat" },
-  { game: "Grimhollow", caption: "The Hollow Marsh biome" },
-];
+import { GAME_GALLERIES } from "@/lib/data/gallery";
 
 export default function ScreenshotsTeaser() {
+  const featured = GAME_GALLERIES.flatMap((game) =>
+    game.screenshots.slice(0, 2).map((shot) => ({ ...shot, game })),
+  ).slice(0, 4);
+
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -25,18 +23,25 @@ export default function ScreenshotsTeaser() {
         </div>
 
         <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-          {FEATURED_SCREENSHOTS.map((shot) => (
-            <div
-              key={shot.game}
+          {featured.map((shot, index) => (
+            <Link
+              key={`${shot.src}-${index}`}
+              href={`/gallery/${shot.game.slug}`}
               className="group relative aspect-square overflow-hidden rounded-xl bg-surface"
             >
-              <div className="absolute inset-0 flex flex-col justify-end p-3">
-                <p className="font-heading text-xs text-red">{shot.game}</p>
-                <p className="font-body text-xs text-foreground/70">
-                  {shot.caption}
+              <Image
+                src={shot.src}
+                alt={`${shot.game.title} screenshot`}
+                fill
+                sizes="(min-width: 768px) 25vw, 50vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/0 to-black/0 p-3">
+                <p className="font-heading text-xs text-white">
+                  {shot.game.title}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -1,43 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
+import { MONTH_LABEL, MONTHLY_PICKS } from "@/lib/data/recommendations";
 
 export const metadata = {
   title: "Monthly Picks — Maverick Drills",
   description:
     "Three games worth your time this month, picked fresh by Maverick Drills.",
 };
-
-// TODO: update every month — swap these for the real picks
-const MONTH_LABEL = "September 2026";
-
-const MONTHLY_PICKS = [
-  {
-    rank: 1,
-    game: "Onimusha: Way of the Sword",
-    genre: "Action-Adventure / Single Player / Sword / Gore",
-    platforms: "PC, PS5, Xbox Series X|S",
-    poster: "/images/games/onimusha-way-of-the-sword.png",
-    blurb:
-      "Onimusha: Way of the Sword is a 2026 dark fantasy action-adventure game developed by Capcom where a resurrected Miyamoto Musashi fights demonic invaders in Edo-period Kyoto.",
-  },
-  {
-    rank: 2,
-    game: "Control Resonant",
-    genre: "Hack and Slash / Action RPG / Story Rich / Lore-Rich / Sci-Fi",
-    platforms: "PC, PS5, Xbox Series X|S",
-    poster: "/images/games/control-resonant.png",
-    blurb:
-      "Control Resonant follows Dylan Faden as he awakens from a seven-year coma to fight a reality-warping Hiss invasion across a fractured Manhattan while searching for his missing sister, Jesse Faden.",
-  },
-  {
-    rank: 3,
-    game: "Marvel's Wolverine",
-    genre: "Action-Adventure / Single Player / Superhero",
-    platforms: "PlayStation 5 Exclusive",
-    poster: "/images/games/marvels-wolverine.png",
-    blurb:
-      "Marvel's Wolverine is a 2026 action-adventure game developed by Insomniac Games where players control the iconic Marvel character in a story-driven campaign.",
-  },
-];
 
 export default function RecommendationsPage() {
   return (
@@ -61,9 +30,10 @@ export default function RecommendationsPage() {
         <div className="mx-auto max-w-4xl px-6 py-16">
           <div className="flex flex-col gap-10">
             {MONTHLY_PICKS.map((pick) => (
-              <article
+              <Link
                 key={pick.rank}
-                className="grid gap-6 border-b border-border pb-10 last:border-b-0 sm:grid-cols-[160px_1fr] sm:gap-8"
+                href={`/recommendations/${pick.slug}`}
+                className="group grid gap-6 border-b border-border pb-10 last:border-b-0 sm:grid-cols-[160px_1fr] sm:gap-8"
               >
                 <div className="relative aspect-[2/3] w-full max-w-[160px] overflow-hidden rounded-xl bg-surface">
                   <Image
@@ -71,14 +41,14 @@ export default function RecommendationsPage() {
                     alt={`${pick.game} poster`}
                     fill
                     sizes="160px"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   <span className="absolute left-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-red font-heading text-sm text-white">
                     {pick.rank}
                   </span>
                 </div>
                 <div>
-                  <h2 className="font-heading text-2xl md:text-3xl">
+                  <h2 className="font-heading text-2xl group-hover:text-red md:text-3xl">
                     {pick.game}
                   </h2>
                   <p className="mt-1 font-body text-sm text-foreground/50">
@@ -87,8 +57,11 @@ export default function RecommendationsPage() {
                   <p className="mt-4 font-body text-base leading-relaxed text-foreground/80">
                     {pick.blurb}
                   </p>
+                  <p className="mt-4 font-heading text-xs text-red">
+                    READ FULL WRITE-UP →
+                  </p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </div>

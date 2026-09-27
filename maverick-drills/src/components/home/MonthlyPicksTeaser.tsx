@@ -1,23 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
+import { MONTHLY_PICKS } from "@/lib/data/recommendations";
+import { LockIcon } from "@/components/ui/icons";
 
-// TODO: replace with real picks once the Recommendations page/data layer is built
-const MONTHLY_PICKS = [
-  {
-    rank: 1,
-    game: "Fractured Throne",
-    blurb: "The comeback strategy game of the year — deep systems, no fluff.",
-  },
-  {
-    rank: 2,
-    game: "Lumen Fields",
-    blurb: "Best co-op I've played this month, hands down.",
-  },
-  {
-    rank: 3,
-    game: "Ember Circuit",
-    blurb: "A tight 6-hour campaign that respects your time.",
-  },
-];
+// TODO: ranks listed here show fully on the homepage teaser; every other
+// rank shows blurred with a lock icon.
+const UNLOCKED_RANKS = [2, 3];
 
 export default function MonthlyPicksTeaser() {
   return (
@@ -36,20 +24,57 @@ export default function MonthlyPicksTeaser() {
         </div>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {MONTHLY_PICKS.map((pick) => (
-            <div
-              key={pick.rank}
-              className="rounded-xl border border-border p-6"
-            >
-              <p className="font-display text-4xl text-red">
-                {String(pick.rank).padStart(2, "0")}
-              </p>
-              <h3 className="mt-3 font-heading text-lg">{pick.game}</h3>
-              <p className="mt-2 font-body text-sm text-foreground/70">
-                {pick.blurb}
-              </p>
-            </div>
-          ))}
+          {MONTHLY_PICKS.map((pick) => {
+            const isLocked = !UNLOCKED_RANKS.includes(pick.rank);
+            const href = isLocked
+              ? "/recommendations"
+              : `/recommendations/${pick.slug}`;
+
+            return (
+              <Link
+                key={pick.rank}
+                href={href}
+                className="group flex gap-4 rounded-xl border border-border p-4 transition-colors hover:border-red"
+              >
+                <div className="relative aspect-[2/3] w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface">
+                  <Image
+                    src={pick.poster}
+                    alt={isLocked ? "Locked pick" : `${pick.game} poster`}
+                    fill
+                    sizes="80px"
+                    className={`object-cover ${isLocked ? "scale-110 blur-md" : ""}`}
+                  />
+                  {isLocked && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <LockIcon className="h-6 w-6 text-white" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="font-display text-lg text-red">
+                    {String(pick.rank).padStart(2, "0")}
+                  </p>
+                  {isLocked ? (
+                    <>
+                      <h3 className="font-heading text-base">Locked Pick</h3>
+                      <p className="mt-1 font-body text-xs text-foreground/60">
+                        See the full list to reveal this one.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="font-heading text-base group-hover:text-red">
+                        {pick.game}
+                      </h3>
+                      <p className="mt-1 font-body text-xs text-foreground/60 line-clamp-2">
+                        {pick.blurb}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
