@@ -65,7 +65,7 @@ export default async function MonthlyPickPage({
                 {pick.genre} · {pick.platforms}
               </p>
               <div className="mx-auto max-w-3xl px-6 py-16">
-                <h2 className="font-heading text-xl">FULL SUMMARY</h2>
+                <h2 className="font-heading text-xl">SUMMARY</h2>
                 <p className="mt-4 whitespace-pre-line font-body text-base leading-relaxed text-foreground/80">
                   {pick.summary}
                 </p>
