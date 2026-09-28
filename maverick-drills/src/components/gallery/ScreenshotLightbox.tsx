@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import {
   CloseIcon,
   DownloadIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@/components/ui/icons";
+import { LoadableImage } from "@/components/ui/LoadableMedia";
 
 type Screenshot = { src: string; caption?: string };
 
@@ -40,7 +40,7 @@ export default function ScreenshotLightbox({
             onClick={() => setOpenIndex(index)}
             className="group relative aspect-video overflow-hidden rounded-lg bg-surface"
           >
-            <Image
+            <LoadableImage
               src={shot.src}
               alt={shot.caption ?? `${gameTitle} screenshot ${index + 1}`}
               fill
@@ -88,7 +88,7 @@ export default function ScreenshotLightbox({
             </button>
 
             <div className="relative h-full w-full max-w-4xl">
-              <Image
+              <LoadableImage
                 src={active.src}
                 alt={
                   active.caption ??

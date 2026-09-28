@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { GAME_GALLERIES, getGameBySlug } from "@/lib/data/gallery";
 import ScreenshotLightbox from "@/components/gallery/ScreenshotLightbox";
+import { LoadableImage } from "@/components/ui/LoadableMedia";
 
 export function generateStaticParams() {
   return GAME_GALLERIES.map((game) => ({ slug: game.slug }));
@@ -43,7 +43,7 @@ export default async function GameGalleryPage({
           </Link>
           <div className="mt-6 flex items-end gap-6">
             <div className="relative hidden aspect-[2/3] w-28 overflow-hidden rounded-lg bg-surface sm:block">
-              <Image
+              <LoadableImage
                 src={game.poster}
                 alt={`${game.title} poster`}
                 fill

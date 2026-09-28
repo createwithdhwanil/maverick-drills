@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { MONTH_LABEL, MONTHLY_PICKS } from "@/lib/data/recommendations";
+import { LoadableImage } from "@/components/ui/LoadableMedia";
 
 export const metadata = {
   title: "Monthly Picks — Maverick Drills",
@@ -36,7 +36,7 @@ export default function RecommendationsPage() {
                 className="group grid gap-6 border-b border-border pb-10 last:border-b-0 sm:grid-cols-[160px_1fr] sm:gap-8"
               >
                 <div className="relative aspect-[2/3] w-full max-w-[160px] overflow-hidden rounded-xl bg-surface">
-                  <Image
+                  <LoadableImage
                     src={pick.poster}
                     alt={`${pick.game} poster`}
                     fill

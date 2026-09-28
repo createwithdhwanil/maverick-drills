@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { GAME_GALLERIES } from "@/lib/data/gallery";
+import { LoadableImage } from "@/components/ui/LoadableMedia";
 
 export const metadata = {
   title: "Gallery — Maverick Drills",
@@ -33,7 +33,7 @@ export default function GalleryPage() {
                 className="group"
               >
                 <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-surface">
-                  <Image
+                  <LoadableImage
                     src={game.poster}
                     alt={`${game.title} poster`}
                     fill

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { MONTHLY_PICKS, getPickBySlug } from "@/lib/data/recommendations";
+import { LoadableImage, LoadableIframe } from "@/components/ui/LoadableMedia";
 
 export function generateStaticParams() {
   return MONTHLY_PICKS.map((pick) => ({ slug: pick.slug }));
@@ -43,7 +43,7 @@ export default async function MonthlyPickPage({
 
           <div className="mt-6 grid gap-8 sm:grid-cols-[200px_1fr]">
             <div className="relative aspect-[2/3] w-full max-w-[200px] overflow-hidden rounded-xl bg-surface">
-              <Image
+              <LoadableImage
                 src={pick.poster}
                 alt={`${pick.game} poster`}
                 fill
@@ -86,15 +86,13 @@ export default async function MonthlyPickPage({
       <section className="border-b border-border">
         <div className="mx-auto max-w-4xl px-6 py-16">
           <h2 className="font-heading text-xl">OFFICIAL TRAILER</h2>
-          <div className="relative mt-6 aspect-video overflow-hidden rounded-xl bg-surface">
-            <iframe
-              src={`https://www.youtube.com/embed/${pick.trailerId}`}
-              title={`${pick.game} — Official Trailer`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="absolute inset-0 h-full w-full"
-            />
-          </div>
+          <LoadableIframe
+            src={`https://www.youtube.com/embed/${pick.trailerId}`}
+            title={`${pick.game} — Official Trailer`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            wrapperClassName="mt-6 aspect-video rounded-xl bg-surface"
+          />
         </div>
       </section>
 

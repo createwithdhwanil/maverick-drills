@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { MONTHLY_PICKS } from "@/lib/data/recommendations";
 import { LockIcon } from "@/components/ui/icons";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
+import { LoadableImage } from "@/components/ui/LoadableMedia";
 
 const UNLOCKED_RANKS = [2, 3];
 
@@ -32,7 +32,7 @@ export default function MonthlyPicksTeaser() {
                   className="group flex gap-4 clip-corner border border-border p-4 transition-colors hover:border-red"
                 >
                   <div className="relative aspect-[2/3] w-20 flex-shrink-0 overflow-hidden clip-corner-sm bg-surface">
-                    <Image
+                    <LoadableImage
                       src={pick.poster}
                       alt={isLocked ? "Locked pick" : `${pick.game} poster`}
                       fill

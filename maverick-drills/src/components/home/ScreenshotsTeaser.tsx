@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { GAME_GALLERIES } from "@/lib/data/gallery";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
+import { LoadableImage } from "@/components/ui/LoadableMedia";
 
 export default function ScreenshotsTeaser() {
   const featured = GAME_GALLERIES.flatMap((game) =>
@@ -36,7 +36,7 @@ export default function ScreenshotsTeaser() {
                       : "aspect-square"
                   }`}
                 >
-                  <Image
+                  <LoadableImage
                     src={shot.src}
                     alt={`${shot.game.title} screenshot`}
                     fill

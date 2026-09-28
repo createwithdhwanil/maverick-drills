@@ -1,6 +1,7 @@
 import { WEBSITE_EXCLUSIVES } from "@/lib/data/originals";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
+import { LoadableVideo } from "@/components/ui/LoadableMedia";
 
 export default function ExclusivesTeaser() {
   return (
@@ -19,12 +20,12 @@ export default function ExclusivesTeaser() {
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:max-w-2xl">
           {WEBSITE_EXCLUSIVES.map((clip, index) => (
             <Reveal key={`${clip.src}-${index}`} delay={index * 100}>
-              <video
+              <LoadableVideo
                 src={clip.src}
                 controls
                 playsInline
                 preload="metadata"
-                className="w-full clip-corner bg-surface"
+                wrapperClassName="clip-corner bg-surface"
               />
               <h3 className="mt-3 font-heading text-sm">{clip.title}</h3>
             </Reveal>

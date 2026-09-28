@@ -1,4 +1,5 @@
 import { ORIGINALS_VIDEOS, WEBSITE_EXCLUSIVES } from "@/lib/data/originals";
+import { LoadableIframe, LoadableVideo } from "@/components/ui/LoadableMedia";
 
 export const metadata = {
   title: "Originals — Maverick Drills",
@@ -31,15 +32,13 @@ export default function OriginalsPage() {
           <div className="mt-8 grid gap-10 md:grid-cols-2">
             {ORIGINALS_VIDEOS.map((video, index) => (
               <div key={`${video.id}-${index}`}>
-                <div className="relative aspect-video overflow-hidden rounded-xl bg-surface">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${video.id}`}
-                    title={video.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="absolute inset-0 h-full w-full"
-                  />
-                </div>
+                <LoadableIframe
+                  src={`https://www.youtube.com/embed/${video.id}`}
+                  title={video.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  wrapperClassName="aspect-video rounded-xl bg-surface"
+                />
                 <h3 className="mt-3 font-heading text-base">{video.title}</h3>
               </div>
             ))}
@@ -60,12 +59,12 @@ export default function OriginalsPage() {
           <div className="mt-8 grid grid-cols-1 items-start gap-8 sm:grid-cols-2 md:grid-cols-3">
             {WEBSITE_EXCLUSIVES.map((clip, index) => (
               <div key={`${clip.src}-${index}`}>
-                <video
+                <LoadableVideo
                   src={clip.src}
                   controls
                   playsInline
                   preload="metadata"
-                  className="w-full rounded-xl bg-surface"
+                  wrapperClassName="rounded-xl bg-surface"
                 />
                 <h3 className="mt-3 font-heading text-sm">{clip.title}</h3>
               </div>
