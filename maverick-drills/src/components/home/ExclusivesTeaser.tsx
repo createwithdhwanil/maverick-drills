@@ -1,37 +1,33 @@
-import Link from "next/link";
 import { WEBSITE_EXCLUSIVES } from "@/lib/data/originals";
+import SectionHeading from "@/components/ui/SectionHeading";
+import Reveal from "@/components/ui/Reveal";
 
 export default function ExclusivesTeaser() {
   return (
-    <section className="border-b border-border">
+    <section>
       <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="flex items-end justify-between gap-4">
-          <h2 className="font-heading text-2xl md:text-3xl">
-            WEBSITE EXCLUSIVES
-          </h2>
-          <Link
-            href="/originals"
-            className="font-body text-sm text-foreground/60 hover:text-red"
-          >
-            Watch more →
-          </Link>
-        </div>
+        <SectionHeading
+          index="02"
+          title="WEBSITE EXCLUSIVES"
+          href="/originals"
+          linkLabel="Watch more"
+        />
         <p className="mt-2 font-body text-sm text-foreground/60">
           Clips you won&apos;t find anywhere else.
         </p>
 
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:max-w-2xl">
           {WEBSITE_EXCLUSIVES.map((clip, index) => (
-            <div key={`${clip.src}-${index}`}>
+            <Reveal key={`${clip.src}-${index}`} delay={index * 100}>
               <video
                 src={clip.src}
                 controls
                 playsInline
                 preload="metadata"
-                className="w-full rounded-xl bg-surface"
+                className="w-full clip-corner bg-surface"
               />
               <h3 className="mt-3 font-heading text-sm">{clip.title}</h3>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

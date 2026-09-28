@@ -27,7 +27,7 @@ export default function Footer() {
               href={YOUTUBE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-full bg-red px-6 py-3 font-heading text-sm text-white transition-colors hover:bg-red-deep"
+              className="flex items-center justify-center gap-2 clip-corner-sm bg-red px-6 py-3 font-heading text-sm text-white transition-colors hover:bg-red-deep"
             >
               <YouTubeIcon className="h-5 w-5" />
               SUBSCRIBE ON YOUTUBE
@@ -36,7 +36,7 @@ export default function Footer() {
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 font-heading text-sm transition-colors hover:border-red hover:text-red"
+              className="flex items-center justify-center gap-2 clip-corner-sm border border-border px-6 py-3 font-heading text-sm transition-colors hover:border-red hover:text-red"
             >
               <InstagramIcon className="h-5 w-5" />
               FOLLOW ON INSTAGRAM

@@ -36,14 +36,14 @@ export default function Hero() {
             href={latestVideoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-full bg-red px-7 py-3 font-heading text-sm text-white transition-colors hover:bg-red-deep"
+            className="flex items-center gap-2 clip-corner-sm bg-red px-7 py-3 font-heading text-sm text-white transition-colors hover:bg-red-deep"
           >
             <YouTubeIcon className="h-5 w-5" />
             WATCH LATEST ON YOUTUBE
           </a>
           <Link
             href="/originals"
-            className="flex items-center gap-2 rounded-full border border-white/30 px-7 py-3 font-heading text-sm text-white transition-colors hover:border-red hover:text-red"
+            className="flex items-center gap-2 clip-corner-sm border border-white/30 px-7 py-3 font-heading text-sm text-white transition-colors hover:border-red hover:text-red"
           >
             BROWSE ORIGINALS
           </Link>

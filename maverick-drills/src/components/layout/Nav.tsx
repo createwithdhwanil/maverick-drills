@@ -46,7 +46,7 @@ export default function Nav() {
             href={YOUTUBE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-full bg-red px-5 py-2 font-heading text-xs text-white transition-colors hover:bg-red-deep"
+            className="flex items-center gap-2 clip-corner-sm bg-red px-5 py-2 font-heading text-xs text-white transition-colors hover:bg-red-deep"
           >
             <YouTubeIcon className="h-4 w-4" />
             SUBSCRIBE

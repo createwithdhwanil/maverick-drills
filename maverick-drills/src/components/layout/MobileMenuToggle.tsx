@@ -51,7 +51,7 @@ export default function MobileMenuToggle({
               href={youtubeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-full bg-red px-5 py-3 font-heading text-sm text-white"
+              className="flex items-center justify-center gap-2 clip-corner-sm bg-red px-5 py-3 font-heading text-sm text-white"
             >
               <YouTubeIcon className="h-4 w-4" />
               SUBSCRIBE ON YOUTUBE
@@ -60,7 +60,7 @@ export default function MobileMenuToggle({
               href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-full border border-border px-5 py-3 font-heading text-sm"
+              className="flex items-center justify-center gap-2 clip-corner-sm border border-border px-5 py-3 font-heading text-sm"
             >
               <InstagramIcon className="h-4 w-4" />
               FOLLOW ON INSTAGRAM
