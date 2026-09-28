@@ -61,7 +61,7 @@ export const MONTHLY_PICKS: MonthlyPick[] = [
       "Dylan's Journey and Gameplay Context: Stepping out from the Oldest House into a fractured New York City, Dylan's journey reverses the perspective of the first game as he navigates an open, reality-warping Manhattan. Armed with a shape-shifting melee weapon called the Aberrant and his own formidable parautilitarian abilities, he fights to contain cosmic threats while resisting the lingering influence of the Hiss. Driven by a deep desire for redemption following his years of captivity, his primary motivation remains a desperate search to uncover the fate of his missing sister, Jesse.",
     trailerId: "SqvAvOAd1VA",
     pricing: [
-      { platform: "PC (Steam)", price: "₹3,499]" },
+      { platform: "PC (Steam)", price: "₹3,499" },
       { platform: "PS5", price: "₹3,599" },
       { platform: "Xbox Series X|S", price: "₹3,599" },
     ],
@@ -81,7 +81,7 @@ export const MONTHLY_PICKS: MonthlyPick[] = [
       "Game Story and Setting: Marvel's Wolverine is set within Earth-1048, sharing a universe with Insomniac's Spider-Man games where mutants live hidden from society. The plot follows Logan three years after leaving Team X, as he reluctantly reunites with his former unit—including Sabretooth—to stop the industrialist Bolivar Trask and his Reavers militia from kidnapping and eradicating displaced mutants. Logan's global journey to stop this threat and rescue Nathaniel Essex takes him from Canada and Japan to the lawless island of Madripoor.",
     otherInfo2:
       "Combat and Gameplay features: Marvel's Wolverine features brutal, M-rated combat built around fast-paced, high-momentum gameplay that heavily utilizes Logan's iconic adamantium claws. Players can execute responsive dodges, parries, and devastating combos, all supported by a lore-accurate healing factor that dynamically repairs injuries and replaces traditional health packs. Additionally, recent updates from Insomniac Games allow players to customize or entirely toggle off navigational features like scent trails for a more tailored gameplay experience.",
-    trailerId: "G62QQ42Ewwg ",
+    trailerId: "G62QQ42Ewwg",
     pricing: [{ platform: "PS5", price: "₹4,999" }],
   },
 ];
