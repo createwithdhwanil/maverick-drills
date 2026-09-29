@@ -15,7 +15,6 @@ export default async function Home() {
   const staticUpcoming = SPOTLIGHT_SLIDES.find(
     (s) => s.id === "upcoming-game",
   )!;
-  const staticNews = SPOTLIGHT_SLIDES.find((s) => s.id === "trendy-news")!;
 
   const [liveWhatsHot, liveUpcoming] = await Promise.all([
     fetchWhatsHotSlide(),
@@ -24,7 +23,6 @@ export default async function Home() {
 
   const spotlightSlides: SpotlightSlide[] = [
     liveWhatsHot ?? staticWhatsHot,
-    staticNews,
     liveUpcoming ?? staticUpcoming,
   ];
 

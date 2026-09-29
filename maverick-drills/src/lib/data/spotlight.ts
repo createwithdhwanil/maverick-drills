@@ -23,15 +23,6 @@ export const SPOTLIGHT_SLIDES: SpotlightSlide[] = [
     ctaHref: "#",
   },
   {
-    id: "trendy-news",
-    kicker: "TRENDING NEWS",
-    title: "[The gaming headline worth knowing about]",
-    blurb: "[One or two sentences summarizing the story.]",
-    image: "/images/spotlight/trendy-news.jpg",
-    ctaLabel: "READ MORE",
-    ctaHref: "#",
-  },
-  {
     id: "upcoming-game",
     kicker: "UPCOMING",
     title: "[Name of the big upcoming game]",
