@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { YouTubeIcon, InstagramIcon } from "../ui/icons";
+import BrandMark from "../ui/BrandMark";
 
 // TODO: swap these for your real channel/handle URLs
 const YOUTUBE_URL = "https://www.youtube.com/@maverickdrillsog";
@@ -32,6 +33,7 @@ export default function Footer() {
               <YouTubeIcon className="h-5 w-5" />
               SUBSCRIBE ON YOUTUBE
             </a>
+
             <a
               href={INSTAGRAM_URL}
               target="_blank"
@@ -70,9 +72,12 @@ export default function Footer() {
             </ul>
           </div>
           <div className="col-span-2 sm:col-span-2">
-            <h3 className="font-heading text-sm text-foreground/50">
-              MAVERICK DRILLS
-            </h3>
+            <div className="flex items-center gap-2">
+              <BrandMark className="h-6 w-6" />
+              <h3 className="font-heading text-sm text-foreground/50">
+                MAVERICK DRILLS
+              </h3>
+            </div>
             <p className="mt-4 max-w-sm font-body text-sm text-foreground/70">
               Gaming content for gamers and casual audiences alike — originals,
               rankings, screenshots, and picks, straight from the channel.
@@ -94,6 +99,7 @@ export default function Footer() {
             >
               <InstagramIcon className="h-5 w-5" />
             </a>
+
             <a
               href={YOUTUBE_URL}
               target="_blank"

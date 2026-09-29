@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { YouTubeIcon, InstagramIcon } from "../ui/icons";
+import BrandMark from "../ui/BrandMark";
 import MobileMenuToggle from "./MobileMenuToggle";
 
 const NAV_LINKS = [
@@ -16,7 +17,11 @@ export default function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="font-heading text-xl tracking-tight">
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-heading text-xl tracking-tight"
+        >
+          <BrandMark className="h-8 w-8" />
           MAVERICK<span className="text-red">DRILLS</span>
         </Link>
 
@@ -42,6 +47,7 @@ export default function Nav() {
           >
             <InstagramIcon className="h-5 w-5" />
           </a>
+
           <a
             href={YOUTUBE_URL}
             target="_blank"
