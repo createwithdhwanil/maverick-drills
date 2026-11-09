@@ -2,8 +2,8 @@ import { ORIGINALS_VIDEOS } from "@/lib/data/originals";
 
 const BRAND_ITEMS = [
   "MAVERICK DRILLS",
-  "GAMER. CREATOR.",
-  "NEW UPLOADS WEEKLY",
+  "GALLARY",
+  "ORIGINALS",
   "SUBSCRIBE ON YOUTUBE",
 ];
 
@@ -12,21 +12,72 @@ export default function Marquee() {
     ...BRAND_ITEMS,
     ...ORIGINALS_VIDEOS.slice(0, 4).map((video) => video.title.toUpperCase()),
   ];
+
+  // Duplicate the content for seamless scrolling.
   const track = [...items, ...items];
 
   return (
-    <div className="overflow-hidden border-y border-border bg-foreground py-3">
-      <div className="flex w-max animate-marquee gap-10 motion-reduce:animate-none hover:[animation-play-state:paused]">
+    <section
+      aria-label="Maverick Drills gaming highlights"
+      className="relative overflow-hidden border-y
+                 border-border bg-surface py-4"
+    >
+      {/* LEFT EDGE GRADIENT */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute
+                   inset-y-0 left-0 z-10
+                   w-12 bg-gradient-to-r
+                   from-surface to-transparent
+                   sm:w-24"
+      />
+
+      {/* RIGHT EDGE GRADIENT */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute
+                   inset-y-0 right-0 z-10
+                   w-12 bg-gradient-to-l
+                   from-surface to-transparent
+                   sm:w-24"
+      />
+
+      {/* SCROLLING CONTENT */}
+      <div
+        className="flex w-max animate-marquee
+                   items-center gap-10
+                   motion-reduce:animate-none
+                   hover:[animation-play-state:paused]"
+      >
         {track.map((item, index) => (
-          <span
+          <div
             key={`${item}-${index}`}
-            className="flex items-center gap-10 whitespace-nowrap font-heading text-sm text-background"
+            aria-hidden={index >= items.length}
+            className="flex shrink-0 items-center
+                       gap-10 whitespace-nowrap"
           >
-            {item}
-            <span className="text-red">◆</span>
-          </span>
+            <span
+              className="font-heading text-xs
+                         uppercase tracking-[0.12em]
+                         text-foreground/70
+                         transition-colors duration-300
+                         hover:text-white
+                         sm:text-sm"
+            >
+              {item}
+            </span>
+
+            {/* RED DIAMOND SEPARATOR */}
+            <span
+              aria-hidden="true"
+              className="text-xs text-red
+                         drop-shadow-[0_0_8px_rgba(229,9,36,0.35)]"
+            >
+              ◆
+            </span>
+          </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
