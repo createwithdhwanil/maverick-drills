@@ -2,7 +2,7 @@ import { ORIGINALS_VIDEOS } from "@/lib/data/originals";
 
 const BRAND_ITEMS = [
   "MAVERICK DRILLS",
-  "GALLARY",
+  "GALLERY",
   "ORIGINALS",
   "SUBSCRIBE ON YOUTUBE",
 ];
@@ -18,9 +18,9 @@ export default function Marquee() {
 
   return (
     <section
-      aria-label="Maverick Drills gaming highlights"
+      aria-hidden="true"
       className="relative overflow-hidden border-y
-                 border-border bg-surface py-4"
+             border-border bg-surface py-4"
     >
       {/* LEFT EDGE GRADIENT */}
       <div
@@ -45,9 +45,9 @@ export default function Marquee() {
       {/* SCROLLING CONTENT */}
       <div
         className="flex w-max animate-marquee
-                   items-center gap-10
-                   motion-reduce:animate-none
-                   hover:[animation-play-state:paused]"
+           items-center gap-10
+           motion-reduce:animate-none
+           hover:[animation-play-state:paused]"
       >
         {track.map((item, index) => (
           <div

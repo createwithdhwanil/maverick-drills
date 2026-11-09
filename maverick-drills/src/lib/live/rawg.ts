@@ -21,8 +21,10 @@ async function fetchRawg(params: Record<string, string>): Promise<RawgGame[]> {
 
   try {
     const res = await fetch(`${RAWG_BASE}?${search.toString()}`, {
-      next: { revalidate: 21600 }, // 6 hours
+      next: { revalidate: 21600 },
+      signal: AbortSignal.timeout(5000),
     });
+
     if (!res.ok) return [];
     const data = await res.json();
     return (data.results ?? []) as RawgGame[];
@@ -56,7 +58,7 @@ export async function fetchUpcomingGameSlide(): Promise<SpotlightSlide | null> {
     id: "upcoming-game",
     kicker: "UPCOMING",
     title: pick.name.toUpperCase(),
-    blurb: `Releasing ${formatReleaseDate(pick.released)} — one of the most anticipated games on the way.`,
+    blurb: `Scheduled for ${formatReleaseDate(pick.released)}. Discover this upcoming release.`,
     image: pick.background_image!,
     ctaLabel: "LEARN MORE",
     ctaHref: `https://rawg.io/games/${pick.slug}`,
@@ -81,8 +83,7 @@ export async function fetchWhatsHotSlide(): Promise<SpotlightSlide | null> {
     id: "whats-hot",
     kicker: "WHAT'S HOT",
     title: pick.name.toUpperCase(),
-    blurb:
-      "Everyone's talking about it right now — currently one of the most-played games out there.",
+    blurb: "Explore a recent game discovery and see what it has to offer.",
     image: pick.background_image!,
     ctaLabel: "SEE WHY",
     ctaHref: `https://rawg.io/games/${pick.slug}`,

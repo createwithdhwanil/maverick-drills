@@ -4,7 +4,6 @@ import LatestUploads from "@/components/home/LatestUploads";
 import ExclusivesTeaser from "@/components/home/ExclusivesTeaser";
 import ScreenshotsTeaser from "@/components/home/ScreenshotsTeaser";
 import MonthlyPicksTeaser from "@/components/home/MonthlyPicksTeaser";
-import SectionDivider from "@/components/ui/SectionDivider";
 import { SPOTLIGHT_SLIDES, type SpotlightSlide } from "@/lib/data/spotlight";
 import { fetchUpcomingGameSlide, fetchWhatsHotSlide } from "@/lib/live/rawg";
 
@@ -27,15 +26,17 @@ export default async function Home() {
   ];
 
   return (
-    <main>
+    <main id="main-content" className="bg-background">
       <Hero spotlightSlides={spotlightSlides} />
+
       <Marquee />
+
       <LatestUploads />
-      <SectionDivider />
+
       <ExclusivesTeaser />
-      <SectionDivider />
+
       <ScreenshotsTeaser />
-      <SectionDivider />
+
       <MonthlyPicksTeaser />
     </main>
   );
