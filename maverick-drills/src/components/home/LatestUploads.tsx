@@ -1,13 +1,13 @@
-import { YouTubeIcon } from "@/components/ui/icons";
-
 import { ORIGINALS_VIDEOS, getYouTubeThumbnail } from "@/lib/data/originals";
 
+import { YouTubeIcon } from "@/components/ui/icons";
 import Reveal from "@/components/ui/Reveal";
+import PremiumTiltCard from "@/components/ui/PremiumTiltCard";
 
 const YOUTUBE_CHANNEL = "https://www.youtube.com/@maverickdrillsog";
 
 export default function LatestUploads() {
-  const featured = ORIGINALS_VIDEOS.slice(0, 3);
+  const videos = ORIGINALS_VIDEOS.slice(0, 3);
 
   return (
     <section
@@ -19,14 +19,15 @@ export default function LatestUploads() {
         bg-background
       "
     >
-      {/* ATMOSPHERIC BACKGROUND GLOW */}
+      {/* Ambient red glow */}
       <div
         aria-hidden="true"
         className="
-          pointer-events-none absolute
-          -right-24 top-12
-          h-96 w-96 rounded-full
-          bg-red/5 blur-3xl
+          pointer-events-none
+          absolute -right-32 top-20
+          h-[450px] w-[450px]
+          rounded-full bg-red/[0.06]
+          blur-[110px]
         "
       />
 
@@ -34,10 +35,9 @@ export default function LatestUploads() {
         className="
           relative mx-auto w-full
           max-w-7xl
-
           px-5 py-20
-          sm:px-8
 
+          sm:px-8
           lg:px-12 lg:py-24
 
           2xl:max-w-[1536px]
@@ -46,7 +46,7 @@ export default function LatestUploads() {
           min-[2000px]:px-16
         "
       >
-        {/* SECTION HEADER */}
+        {/* HEADER */}
         <Reveal>
           <div
             className="
@@ -71,8 +71,7 @@ export default function LatestUploads() {
                 className="
                   font-display
                   text-3xl uppercase
-                  leading-tight
-                  tracking-[-0.04em]
+                  leading-tight tracking-[-0.04em]
                   text-foreground
 
                   sm:text-4xl
@@ -87,8 +86,7 @@ export default function LatestUploads() {
                   mt-3 max-w-lg
                   font-body text-sm
                   leading-relaxed
-                  text-muted
-                  sm:text-base
+                  text-muted sm:text-base
                 "
               >
                 Fresh gameplay, epic moments, and original gaming content
@@ -101,12 +99,16 @@ export default function LatestUploads() {
               target="_blank"
               rel="noopener noreferrer"
               className="
-                premium-link group
+                group inline-flex
+                items-center gap-2
                 border-b border-red pb-2
 
                 font-heading text-xs
                 uppercase tracking-wide
                 text-foreground
+
+                transition-colors
+                hover:text-red
               "
             >
               <YouTubeIcon className="h-4 w-4 text-red" />
@@ -114,7 +116,7 @@ export default function LatestUploads() {
               <span
                 aria-hidden="true"
                 className="
-                  transition-transform duration-200
+                  transition-transform
                   group-hover:translate-x-1
                   group-hover:-translate-y-1
                 "
@@ -125,275 +127,294 @@ export default function LatestUploads() {
           </div>
         </Reveal>
 
-        {/* VIDEO CARDS */}
-        {featured.length > 0 ? (
+        {/* PREMIUM VIDEO GRID */}
+        {videos.length > 0 ? (
           <div
             className="
-              mt-10 grid gap-5
+    mt-12 grid gap-5
 
-              md:grid-cols-2
+    md:grid-cols-2
 
-              lg:grid-cols-4
-              lg:grid-rows-2
-            "
+    lg:grid-cols-4
+    lg:grid-rows-none
+    lg:auto-rows-[235px]
+
+    2xl:auto-rows-[280px]
+
+    min-[2000px]:auto-rows-[310px]
+  "
           >
-            {featured.map((video, index) => {
+            {videos.map((video, index) => {
               const isFeatured = index === 0;
 
               return (
                 <Reveal
                   key={video.id}
                   delay={index * 100}
-                  className={
-                    isFeatured
-                      ? "md:col-span-2 lg:col-span-2 lg:row-span-2"
-                      : "lg:col-span-2"
-                  }
+                  className={`
+    h-full min-h-0
+    ${isFeatured ? "md:col-span-2 lg:row-span-2" : "lg:col-span-2"}
+  `}
                 >
-                  <a
-                    href={`https://www.youtube.com/watch?v=${video.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Watch ${video.title} on YouTube`}
-                    className="
-                      premium-card group
-                      relative flex h-full
-                      min-h-[240px] flex-col
-                      overflow-hidden clip-corner
+                  <PremiumTiltCard maxTilt={isFeatured ? 3.5 : 5}>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${video.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Watch ${video.title} on YouTube`}
+                      className={`
+                        group relative block
+                        h-full min-h-[275px]
+                        w-full overflow-hidden
+                        clip-corner
 
-                      border border-white/10
-                      bg-surface
+                        border border-white/10
+                        bg-surface
 
-                      sm:min-h-[300px]
-                      lg:min-h-[220px]
-                    "
-                  >
-                    {/* REAL YOUTUBE THUMBNAIL */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={getYouTubeThumbnail(video.id)}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="
-                        premium-image
-                        absolute inset-0
-                        h-full w-full
-                        object-cover
-                      "
-                    />
+                        sm:min-h-[310px]
 
-                    {/* CINEMATIC GRADIENT */}
-                    <div
-                      aria-hidden="true"
-                      className="
-                        pointer-events-none absolute inset-0
-
-                        bg-gradient-to-t
-                        from-black/95
-                        via-black/35
-                        to-black/10
-                      "
-                    />
-
-                    {/* TOP BADGES */}
-                    <div
-                      className="
-                        relative z-10
-                        flex items-start
-                        justify-between gap-2
-                        p-4 sm:p-5
-                      "
+                        lg:min-h-0
+                        lg:aspect-auto
+                      `}
                     >
-                      <span
-                        className={`
-                          inline-flex
-                          px-3 py-1.5
-                          font-heading
-                          text-[10px] uppercase
-                          tracking-wider text-white
-
-                          ${
-                            isFeatured
-                              ? "bg-red"
-                              : "border border-white/25 bg-black/60 backdrop-blur-md"
-                          }
-                        `}
-                      >
-                        {isFeatured ? "LATEST DROP" : "MAVERICK ORIGINAL"}
-                      </span>
-
-                      <span
+                      {/* ACTUAL YOUTUBE THUMBNAIL */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={getYouTubeThumbnail(video.id)}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
                         className="
-                          border border-white/25
-                          bg-black/60
-                          px-2.5 py-1.5
+                          absolute inset-0
+                          h-full w-full
+                          object-cover
 
-                          font-body text-[10px]
-                          uppercase tracking-wider
-                          text-white/90
-                          backdrop-blur-md
-                        "
-                      >
-                        YOUTUBE
-                      </span>
-                    </div>
+                          transition-transform
+                          duration-700
+                          ease-out
 
-                    {/* PLAY BUTTON */}
-                    <div
-                      aria-hidden="true"
-                      className="
-                        pointer-events-none absolute inset-0
-                        flex items-center justify-center
-                      "
-                    >
-                      <div
-                        className="
-                          flex h-14 w-14
-                          items-center justify-center
-                          rounded-full
-
-                          bg-red text-white
-
-                          shadow-[0_0_35px_rgba(229,9,36,0.28)]
-
-                          transition-all duration-300
-
-                          group-hover:scale-110
-                          group-hover:shadow-[0_0_48px_rgba(229,9,36,0.45)]
-
-                          sm:h-16 sm:w-16
+                          group-hover:scale-[1.08]
 
                           motion-reduce:transition-none
                           motion-reduce:group-hover:scale-100
                         "
-                      >
-                        <YouTubeIcon className="h-7 w-7" />
-                      </div>
-                    </div>
+                      />
 
-                    {/* VIDEO INFORMATION */}
-                    <div
-                      className="
-                        relative z-10 mt-auto
-                        w-full p-5 sm:p-7
-                      "
-                    >
+                      {/* CINEMATIC SHADING */}
+                      <div
+                        aria-hidden="true"
+                        className="
+                          pointer-events-none
+                          absolute inset-0
+
+                          bg-gradient-to-t
+                          from-black/95
+                          via-black/35
+                          to-black/10
+                        "
+                      />
+
+                      {/* TOP BADGES */}
                       <div
                         className="
-                          mb-3 flex items-center gap-2
-
-                          font-body text-[10px]
-                          uppercase tracking-[0.14em]
-                          text-white/75
+                          absolute inset-x-0
+                          top-0 z-10
+                          flex items-start
+                          justify-between gap-3
+                          p-4 sm:p-5
                         "
                       >
                         <span
-                          className="
-                            h-1.5 w-1.5
-                            rounded-full bg-red
-                          "
-                        />
-                        MAVERICK DRILLS
-                      </div>
+                          className={`
+                            px-3 py-2
+                            font-heading
+                            text-[10px]
+                            uppercase tracking-wide
+                            text-white
 
-                      <h3
-                        className={`
-                          max-w-xl font-heading
-                          uppercase leading-snug
-                          text-white
-
-                          transition-colors duration-300
-                          group-hover:text-white
-
-                          ${
-                            isFeatured
-                              ? "text-lg sm:text-2xl lg:text-3xl"
-                              : "text-sm sm:text-lg"
-                          }
-                        `}
-                      >
-                        {video.title}
-                      </h3>
-
-                      <div
-                        className="
-                          mt-5 flex items-center gap-2
-
-                          font-heading text-[11px]
-                          uppercase tracking-wide
-                          text-white/85
-                        "
-                      >
-                        <span className="text-red">WATCH VIDEO</span>
+                            ${
+                              isFeatured
+                                ? "bg-red"
+                                : "border border-white/20 bg-black/65 backdrop-blur-md"
+                            }
+                          `}
+                        >
+                          {isFeatured ? "LATEST DROP" : "MAVERICK ORIGINAL"}
+                        </span>
 
                         <span
-                          aria-hidden="true"
                           className="
-                            text-red
-                            transition-transform duration-200
+                            border border-white/20
+                            bg-black/65 px-2.5 py-1.5
 
-                            group-hover:translate-x-1
-                            group-hover:-translate-y-1
+                            font-body text-[10px]
+                            uppercase tracking-wide
+                            text-white/90
+                            backdrop-blur-md
                           "
                         >
-                          ↗
+                          YOUTUBE
                         </span>
                       </div>
-                    </div>
 
-                    {/* HOVER BORDER */}
-                    <div
-                      aria-hidden="true"
-                      className="
-                        pointer-events-none
-                        absolute inset-0
-                        border border-white/10
+                      {/* GLOWING PLAY CONTROL */}
+                      <div
+                        aria-hidden="true"
+                        className="
+                          pointer-events-none
+                          absolute inset-0 z-10
+                          flex items-center
+                          justify-center
+                        "
+                      >
+                        <div
+                          className="
+                            flex h-16 w-16
+                            items-center justify-center
+                            rounded-full
 
-                        transition-colors duration-300
-                        group-hover:border-red/60
-                      "
-                    />
-                  </a>
+                            border border-white/20
+                            bg-red text-white
+
+                            shadow-[0_0_35px_rgba(229,9,36,0.28)]
+
+                            transition-all duration-500
+
+                            group-hover:scale-110
+                            group-hover:shadow-[0_0_65px_rgba(229,9,36,0.48)]
+
+                            motion-reduce:transition-none
+                            motion-reduce:group-hover:scale-100
+                          "
+                        >
+                          <YouTubeIcon className="h-7 w-7" />
+                        </div>
+                      </div>
+
+                      {/* BOTTOM INFORMATION */}
+                      <div
+                        className="
+                          absolute inset-x-0
+                          bottom-0 z-10
+                          p-5 sm:p-7
+                        "
+                      >
+                        <p
+                          className="
+                            mb-3 flex
+                            items-center gap-2
+
+                            font-body
+                            text-[10px]
+                            uppercase tracking-[0.14em]
+                            text-white/70
+                          "
+                        >
+                          <span
+                            className="
+                              h-1.5 w-1.5
+                              rounded-full bg-red
+                            "
+                          />
+                          MAVERICK DRILLS
+                        </p>
+
+                        <h3
+                          className={`
+                            max-w-xl
+                            font-heading
+                            uppercase
+                            leading-snug
+
+                            text-white
+                            [text-shadow:0_2px_16px_rgba(0,0,0,0.7)]
+
+                            ${
+                              isFeatured
+                                ? "text-lg sm:text-2xl lg:text-3xl"
+                                : "text-sm sm:text-lg"
+                            }
+                          `}
+                        >
+                          {video.title}
+                        </h3>
+
+                        <div
+                          className="
+                            mt-4 flex
+                            items-center gap-2
+
+                            font-heading
+                            text-[10px]
+                            uppercase tracking-wide
+                            text-red
+                          "
+                        >
+                          WATCH VIDEO
+                          <span
+                            aria-hidden="true"
+                            className="
+                              transition-transform
+                              group-hover:translate-x-1
+                              group-hover:-translate-y-1
+                            "
+                          >
+                            ↗
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* CARD BORDER */}
+                      <div
+                        aria-hidden="true"
+                        className="
+                          pointer-events-none
+                          absolute inset-0 z-20
+
+                          border border-white/10
+
+                          transition-colors
+                          group-hover:border-red/50
+                        "
+                      />
+                    </a>
+                  </PremiumTiltCard>
                 </Reveal>
               );
             })}
           </div>
         ) : (
-          <div
+          <p
             className="
               mt-10 border border-border
-              bg-surface p-10 text-center
+              bg-surface p-10
+              text-center text-muted
             "
           >
-            <p className="font-body text-muted">
-              New Maverick Drills videos are coming soon.
-            </p>
-          </div>
+            New videos are coming soon.
+          </p>
         )}
 
-        {/* BOTTOM ACTION */}
+        {/* CHANNEL CTA */}
         <Reveal delay={300}>
-          <div className="mt-10 flex justify-center">
+          <div className="mt-12 flex justify-center">
             <a
               href={YOUTUBE_CHANNEL}
               target="_blank"
               rel="noopener noreferrer"
               className="
-                premium-glow
+                cinematic-button
                 inline-flex min-h-12
-                items-center justify-center gap-3
-
+                items-center gap-3
                 clip-corner-sm
-                border border-border
-                bg-surface
 
-                px-7 py-3.5
-                font-heading text-xs uppercase
-                text-foreground
+                border border-border
+                bg-surface px-7 py-3.5
+
+                font-heading text-xs
+                uppercase text-foreground
 
                 transition-colors duration-300
-
                 hover:border-red
                 hover:bg-red
                 hover:text-white
