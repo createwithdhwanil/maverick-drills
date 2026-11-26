@@ -1,43 +1,82 @@
 @import "tailwindcss";
 
+/* =========================================
+   MAVERICK DRILLS — GLOBAL DESIGN SYSTEM
+========================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --surface: #f4f4f4;
-  --border: #e0e0e0;
-  --red: #e31e24;
-  --red-deep: #b8151a;
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --background: #0b0d10;
+  --foreground: #f5f5f5;
+  --surface: #171a20;
+  --surface-hover: #20242c;
+  --border: #292d35;
+
+  /* Brand */
+  --red: #e50924;
+  --red-deep: #b9071d;
+
+  /* Supporting text */
+  --muted: #949cab;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ffffff;
-    --surface: #171717;
-    --border: #2a2a2a;
-    --red: #ff3b3f;
-    --red-deep: #e31e24;
-  }
-}
+/* =========================================
+   TAILWIND CSS 4 THEME
+========================================= */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
   --color-border: var(--border);
+
   --color-red: var(--red);
   --color-red-deep: var(--red-deep);
+  --color-muted: var(--muted);
 
+  /* Existing Next.js fonts */
   --font-display: var(--font-archivo-black);
   --font-heading: var(--font-bungee);
   --font-body: var(--font-dm-sans);
 }
 
-body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-body);
+/* =========================================
+   GLOBAL ELEMENTS
+========================================= */
+
+html {
+  scroll-behavior: smooth;
 }
+
+body {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--red);
+  color: #ffffff;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
+
+/* =========================================
+   EXISTING CORNER UTILITIES
+========================================= */
 
 @utility clip-corner {
   clip-path: polygon(
@@ -59,10 +98,15 @@ body {
   );
 }
 
+/* =========================================
+   MARQUEE
+========================================= */
+
 @keyframes marquee {
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(-50%);
   }
@@ -72,10 +116,15 @@ body {
   animation: marquee 28s linear infinite;
 }
 
+/* =========================================
+   SKELETON LOADING
+========================================= */
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -83,12 +132,14 @@ body {
 
 @utility skeleton-shimmer {
   background-color: var(--color-surface);
+
   background-image: linear-gradient(
     100deg,
     transparent 30%,
     color-mix(in srgb, var(--color-red) 18%, transparent) 50%,
     transparent 70%
   );
+
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
 }
@@ -118,5 +169,141 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* =========================================
+   PREMIUM CARD INTERACTIONS
+========================================= */
+
+@utility premium-card {
+  position: relative;
+  isolation: isolate;
+
+  transition:
+    transform 350ms ease,
+    border-color 350ms ease,
+    box-shadow 350ms ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba(229, 9, 36, 0.5);
+
+    box-shadow:
+      0 18px 48px rgba(0, 0, 0, 0.28),
+      0 0 20px rgba(229, 9, 36, 0.08);
+  }
+
+  &:focus-within {
+    border-color: var(--red);
+  }
+}
+
+/* =========================================
+   PREMIUM IMAGE INTERACTION
+========================================= */
+
+@utility premium-image {
+  transition:
+    transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 700ms ease;
+
+  .group:hover &,
+  .group:focus-visible & {
+    transform: scale(1.045);
+  }
+}
+
+/* =========================================
+   PREMIUM BUTTON GLOW
+========================================= */
+
+@utility premium-glow {
+  transition:
+    box-shadow 300ms ease,
+    background-color 300ms ease,
+    border-color 300ms ease;
+
+  &:hover {
+    box-shadow:
+      0 0 24px rgba(229, 9, 36, 0.22),
+      0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* =========================================
+   PREMIUM EDITORIAL LINKS
+========================================= */
+
+@utility premium-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  transition: color 250ms ease;
+
+  &:hover {
+    color: var(--red);
+  }
+}
+
+/* =========================================
+   ATMOSPHERIC BACKGROUNDS
+========================================= */
+
+@utility premium-atmosphere {
+  position: relative;
+  isolation: isolate;
+
+  background-image: radial-gradient(
+    ellipse at 95% 15%,
+    rgba(229, 9, 36, 0.055),
+    transparent 45%
+  );
+}
+
+/* =========================================
+   EDITORIAL SECTION DIVIDER
+========================================= */
+
+@utility premium-divider {
+  height: 1px;
+  border: 0;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(229, 9, 36, 0.28),
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+}
+
+/* =========================================
+   REDUCED MOTION ACCESSIBILITY
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-marquee,
+  .skeleton-shimmer {
+    animation: none;
+  }
+
+  .premium-card,
+  .premium-image,
+  .premium-glow,
+  .premium-link {
+    transition: none;
+  }
+
+  .premium-card:hover,
+  .group:hover .premium-image,
+  .group:focus-visible .premium-image {
+    transform: none;
   }
 }
