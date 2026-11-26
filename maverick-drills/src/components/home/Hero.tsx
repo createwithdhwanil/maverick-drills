@@ -55,9 +55,7 @@ export default function Hero({
       ],
     }));
 
-    if (!latestVideo) {
-      return featuredGames;
-    }
+    if (!latestVideo) return featuredGames;
 
     const uploadSlide: HeroSlide = {
       id: "latest-upload",
@@ -81,7 +79,6 @@ export default function Hero({
       ],
     };
 
-    // Game spotlights appear first.
     return [...featuredGames, uploadSlide];
   }, [latestVideo, spotlightSlides]);
 
@@ -94,7 +91,7 @@ export default function Hero({
   const safeActive = total > 0 ? active % total : 0;
   const current = slides[safeActive];
 
-  // Automatic carousel playback
+  // Automatic carousel
   useEffect(() => {
     if (paused || total <= 1) return;
 
@@ -109,11 +106,11 @@ export default function Hero({
     return () => window.clearInterval(timer);
   }, [paused, total]);
 
-  const goTo = (index: number) => {
+  function goTo(index: number) {
     if (total <= 0) return;
 
     setActive(((index % total) + total) % total);
-  };
+  }
 
   if (!current) return null;
 
@@ -141,46 +138,43 @@ export default function Hero({
 
         const endX = event.changedTouches[0]?.clientX;
 
-        if (endX === undefined) {
-          touchStartX.current = null;
-          return;
-        }
+        touchStartX.current = null;
+
+        if (endX === undefined) return;
 
         const difference = touchStartX.current - endX;
-        touchStartX.current = null;
 
         if (Math.abs(difference) > 60) {
           goTo(safeActive + (difference > 0 ? 1 : -1));
         }
       }}
     >
-      {/* =====================================
-          CINEMATIC BACKGROUND
-      ===================================== */}
-
+      {/* CINEMATIC BACKGROUND */}
       <div
-        className="pointer-events-none absolute inset-0 -z-10"
+        className="pointer-events-none absolute inset-0 z-0"
         aria-hidden="true"
       >
         <div
           key={current.id}
           className="
             absolute inset-0
-            bg-cover bg-center
+            bg-cover
             motion-safe:animate-[hero-reveal_900ms_ease-out_both]
           "
           style={{
             backgroundImage: `url("${current.image}")`,
+            backgroundPosition:
+              current.id === "latest-upload" ? "center center" : "65% center",
           }}
         />
 
-        {/* Horizontal gradient for readability */}
+        {/* Horizontal dark gradient */}
         <div
           className="
             absolute inset-0
             bg-gradient-to-r
             from-background
-            via-background/75
+            via-background/65
             to-transparent
           "
         />
@@ -197,24 +191,16 @@ export default function Hero({
         />
       </div>
 
-      {/* =====================================
-          MAIN HERO CONTENT
-      ===================================== */}
-
+      {/* MAIN HERO CONTENT */}
       <div
         className="
-          relative mx-auto
-          flex w-full items-center
-          min-h-[560px]
-          max-w-7xl
+          relative z-10
+          mx-auto flex w-full items-center
+          min-h-[560px] max-w-7xl
+          px-5 pb-32 pt-20
 
-          px-5 pb-28 pt-20
-
-          sm:min-h-[630px]
-          sm:px-8
-
-          lg:min-h-[700px]
-          lg:px-12
+          sm:min-h-[630px] sm:px-8
+          lg:min-h-[700px] lg:px-12
 
           2xl:max-w-[1536px]
 
@@ -223,42 +209,30 @@ export default function Hero({
           min-[2000px]:px-16
         "
       >
-        {/* IMPORTANT:
-            Keep all text stacked vertically.
-            Do not add min-height or container
-            padding classes to this inner div.
-        */}
-
         <div
           key={current.id}
           className="
-            flex w-full flex-col items-start
-            max-w-[650px]
+            flex w-full max-w-[680px]
+            flex-col items-start
 
-            2xl:max-w-[720px]
-
-            min-[2000px]:max-w-[800px]
+            2xl:max-w-[750px]
+            min-[2000px]:max-w-[820px]
 
             motion-safe:animate-[hero-content_650ms_ease-out_both]
           "
         >
-          {/* FEATURED LABEL */}
-
+          {/* FEATURED BADGE */}
           <span
             className="
-              mb-6 inline-flex
-              max-w-full items-center
-              clip-corner-sm
-
-              bg-red/95
+              mb-6 inline-flex max-w-full items-center
+              clip-corner-sm bg-red/95
               px-4 py-2
 
               font-heading text-[10px]
               uppercase tracking-[0.08em]
               text-white
 
-              shadow-[0_0_25px_rgba(229,9,36,0.2)]
-
+              shadow-[0_0_25px_rgba(229,9,36,0.25)]
               sm:text-xs
             "
           >
@@ -266,37 +240,27 @@ export default function Hero({
           </span>
 
           {/* GAME TITLE */}
-
           <h1
             className="
-              w-full max-w-[800px]
-
-              font-display
-              text-[clamp(2.5rem,5vw,6rem)]
-              uppercase
-
+              w-full max-w-[820px]
+              font-display font-black uppercase
+              text-[clamp(2.75rem,5vw,6.5rem)]
               leading-[0.98]
-              tracking-[-0.045em]
-
-              text-white
+              tracking-[-0.05em]
+              text-white break-words
 
               [text-shadow:0_4px_30px_rgba(0,0,0,0.45)]
-
-              break-words
             "
           >
             {current.title}
           </h1>
 
           {/* DESCRIPTION */}
-
           <p
             className="
               mt-6 max-w-[520px]
-
-              font-body
-              text-sm leading-relaxed
-              text-white/80
+              font-body text-sm leading-relaxed
+              text-white/85
 
               sm:text-base
               lg:text-lg
@@ -305,26 +269,19 @@ export default function Hero({
             {current.blurb}
           </p>
 
-          {/* CALL TO ACTION BUTTONS */}
-
+          {/* CTA BUTTONS */}
           <div className="mt-9 flex w-full flex-wrap gap-3">
             {current.ctas.map((cta) => {
               const isPrimary = cta.kind !== "secondary";
 
               const buttonClass = `
                 inline-flex min-h-12
-                items-center justify-center
-                gap-2
-
+                items-center justify-center gap-2
                 clip-corner-sm
-                px-5 py-3
-                sm:px-7
-
-                font-heading
-                text-[11px]
+                px-5 py-3 sm:px-7
+                font-heading text-[11px]
                 uppercase tracking-wide
                 sm:text-xs
-
                 transition-all duration-300
 
                 ${
@@ -341,7 +298,6 @@ export default function Hero({
                   ) : (
                     <ChevronRightIcon className="h-4 w-4 shrink-0" />
                   )}
-
                   <span>{cta.label}</span>
                 </>
               );
@@ -370,124 +326,94 @@ export default function Hero({
         </div>
       </div>
 
-      {/* =====================================
-          BOTTOM CAROUSEL CONTROLS
-      ===================================== */}
+      {/* BOTTOM CAROUSEL CONTROLS */}
+      <div className="absolute inset-x-0 bottom-6 z-30">
+        <div
+          className="
+            mx-auto flex w-full max-w-7xl
+            items-center justify-between gap-3
+            px-5 sm:px-8 lg:px-12
 
-      <div
-        className="
-          absolute inset-x-0 bottom-6 z-10
-          mx-auto flex w-full
-          max-w-7xl
+            2xl:max-w-[1536px]
 
-          items-center justify-between
-          gap-3
-
-          px-5 sm:px-8 lg:px-12
-
-          2xl:max-w-[1536px]
-
-          min-[2000px]:max-w-[1760px]
-          min-[2000px]:px-16
-        "
-      >
-        {/* SLIDE COUNTER */}
-
-        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-          <span
-            className="
-              shrink-0 font-body
-              text-xs font-medium
-              tracking-wider text-white
-              sm:text-sm
-            "
-          >
-            {number}
-
-            <span className="text-white/45">
-              {" / "}
-              {totalNumber}
+            min-[2000px]:max-w-[1760px]
+            min-[2000px]:px-16
+          "
+        >
+          {/* COUNTER + SLIDE INDICATORS */}
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <span
+              className="
+                shrink-0 font-body
+                text-xs font-medium tracking-wider
+                text-white sm:text-sm
+              "
+            >
+              {number}
+              <span className="text-white/50">
+                {" / "}
+                {totalNumber}
+              </span>
             </span>
-          </span>
 
-          {/* SLIDE INDICATORS */}
+            <div className="flex items-center gap-2">
+              {slides.map((slide, index) => (
+                <button
+                  key={slide.id}
+                  type="button"
+                  onClick={() => goTo(index)}
+                  aria-label={`Go to slide ${index + 1}: ${slide.title}`}
+                  aria-current={index === safeActive ? "true" : undefined}
+                  className={`
+                    h-2 rounded-full
+                    transition-all duration-300
 
-          <div className="flex items-center gap-1.5">
-            {slides.map((slide, index) => (
+                    ${
+                      index === safeActive
+                        ? "w-9 bg-red"
+                        : "w-5 bg-white/50 hover:bg-white"
+                    }
+                  `}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* PREVIOUS / NEXT ARROWS */}
+          {total > 1 && (
+            <div className="flex shrink-0 items-center gap-3">
               <button
-                key={slide.id}
                 type="button"
-                onClick={() => goTo(index)}
-                aria-label={`Go to slide ${index + 1}: ${slide.title}`}
-                aria-current={index === safeActive ? "true" : undefined}
-                className={`
-                  h-2 rounded-full
-                  transition-all duration-300
+                onClick={() => goTo(safeActive - 1)}
+                aria-label="Previous slide"
+                className="
+                  flex h-11 w-11 items-center justify-center
+                  rounded-full border border-white/40
+                  bg-black/70 text-white backdrop-blur-lg
+                  transition-all duration-200
+                  hover:border-red hover:bg-red
+                "
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+              </button>
 
-                  ${
-                    index === safeActive
-                      ? "w-8 bg-red"
-                      : "w-5 bg-white/35 hover:bg-white/70"
-                  }
-                `}
-              />
-            ))}
-          </div>
+              <button
+                type="button"
+                onClick={() => goTo(safeActive + 1)}
+                aria-label="Next slide"
+                className="
+                  flex h-11 w-11 items-center justify-center
+                  rounded-full border border-white/40
+                  bg-black/70 text-white backdrop-blur-lg
+                  transition-all duration-200
+                  hover:border-red hover:bg-red
+                "
+              >
+                <ChevronRightIcon className="h-5 w-5" />
+              </button>
+            </div>
+          )}
         </div>
-
-        {/* PREVIOUS / NEXT CONTROLS */}
-
-        {total > 1 && (
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => goTo(safeActive - 1)}
-              aria-label="Previous slide"
-              className="
-                flex h-10 w-10
-                items-center justify-center
-
-                rounded-full
-                border border-white/30
-                bg-black/40 text-white
-
-                backdrop-blur-md
-                transition-all duration-200
-
-                hover:border-red
-                hover:bg-red
-
-                sm:h-11 sm:w-11
-              "
-            >
-              <ChevronLeftIcon className="h-5 w-5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => goTo(safeActive + 1)}
-              aria-label="Next slide"
-              className="
-                flex h-10 w-10
-                items-center justify-center
-
-                rounded-full
-                border border-white/30
-                bg-black/40 text-white
-
-                backdrop-blur-md
-                transition-all duration-200
-
-                hover:border-red
-                hover:bg-red
-
-                sm:h-11 sm:w-11
-              "
-            >
-              <ChevronRightIcon className="h-5 w-5" />
-            </button>
-          </div>
-        )}
       </div>
     </section>
   );

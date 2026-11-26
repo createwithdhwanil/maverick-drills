@@ -120,7 +120,7 @@ export default function ExclusivesTeaser() {
                                hover:border-red/50"
                   >
                     {/* VIDEO PLAYER */}
-                    <div className="relative bg-black">
+                    <div className="relative overflow-hidden border-b border-border/60 bg-[#08090C]">
                       <div
                         className="absolute left-4 top-4
                                    z-10 pointer-events-none
@@ -139,7 +139,14 @@ export default function ExclusivesTeaser() {
                         controls
                         playsInline
                         preload="metadata"
-                        wrapperClassName="aspect-video w-full overflow-hidden bg-black [&_video]:h-full [&_video]:w-full [&_video]:object-contain"
+                        wrapperClassName="
+    aspect-video w-full
+    overflow-hidden
+    bg-[#08090C]
+    [&_video]:h-full
+    [&_video]:w-full
+    [&_video]:object-contain
+  "
                       />
                     </div>
 
