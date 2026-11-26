@@ -307,3 +307,40 @@ button {
     transform: none;
   }
 }
+
+/* =========================================
+   PREMIUM BUTTON LIGHT SWEEP
+========================================= */
+
+@utility cinematic-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+      110deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.16) 48%,
+      transparent 75%
+    );
+
+    transform: translateX(-140%);
+    transition: transform 650ms ease;
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    transform: translateX(140%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-button::after {
+    display: none;
+  }
+}

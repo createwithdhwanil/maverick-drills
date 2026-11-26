@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { YouTubeIcon, InstagramIcon } from "../ui/icons";
 import MobileMenuToggle from "./MobileMenuToggle";
+import { motion, useScroll, useSpring } from "motion/react";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -19,6 +20,14 @@ const INSTAGRAM_URL = "https://www.instagram.com/maverickdrills/";
 
 export default function Nav() {
   const pathname = usePathname();
+
+  const { scrollYProgress } = useScroll();
+
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    restDelta: 0.001,
+  });
 
   return (
     <header
@@ -101,9 +110,7 @@ export default function Nav() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow Maverick Drills on Instagram"
-            className="text-foreground/65
-                       transition-colors duration-200
-                       hover:text-red"
+            className="cinematic-button clip-corner-sm bg-red px-6 py-3 text-white"
           >
             <InstagramIcon className="h-5 w-5" />
           </a>
@@ -113,12 +120,7 @@ export default function Nav() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Subscribe to Maverick Drills on YouTube"
-            className="clip-corner-sm flex items-center
-                       gap-2 bg-red px-4 py-2.5
-                       font-heading text-xs
-                       text-white transition-all
-                       duration-200 hover:bg-red-deep
-                       hover:shadow-[0_0_20px_rgba(229,9,36,0.25)]"
+            className="cinematic-button clip-corner-sm bg-red px-6 py-3 text-white"
           >
             <YouTubeIcon className="h-4 w-4" />
             <span>SUBSCRIBE</span>
@@ -132,6 +134,18 @@ export default function Nav() {
           instagramUrl={INSTAGRAM_URL}
         />
       </div>
+
+      {/* CINEMATIC SCROLL PROGRESS */}
+      <motion.div
+        aria-hidden="true"
+        className="
+    pointer-events-none absolute
+    bottom-0 left-0 right-0
+    z-20 h-[2px]
+    origin-left bg-red
+  "
+        style={{ scaleX }}
+      />
     </header>
   );
 }
