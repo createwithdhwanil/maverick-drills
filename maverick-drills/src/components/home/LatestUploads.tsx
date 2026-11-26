@@ -26,7 +26,7 @@ export default function LatestUploads() {
         className="
   relative mx-auto w-full
   max-w-7xl
-  px-5 py-16
+  px-5 py-20
   sm:px-8 sm:py-20
   lg:px-12 lg:py-24
   2xl:max-w-[1536px]
@@ -219,7 +219,7 @@ export default function LatestUploads() {
                                   uppercase leading-snug
                                   text-white
                                   transition-colors
-                                  group-hover:text-red
+                                  group-hover:text-white
                                   ${
                                     isFeatured
                                       ? "text-xl sm:text-2xl lg:text-3xl"

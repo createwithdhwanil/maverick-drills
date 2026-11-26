@@ -144,13 +144,15 @@ export default function Footer() {
 
         {/* MAIN FOOTER CONTENT */}
         <div
-          className="grid gap-12 py-14
-                     md:grid-cols-2
-                     lg:grid-cols-4 lg:gap-10
-                     lg:py-20"
+          className="
+  grid grid-cols-2
+  gap-x-6 gap-y-10 py-12
+  lg:grid-cols-4
+  lg:gap-10 lg:py-20
+"
         >
           {/* BRAND COLUMN */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2">
             <Link
               href="/"
               aria-label="Maverick Drills homepage"

@@ -130,9 +130,11 @@ export default function MonthlyPicksTeaser() {
                   >
                     {/* GAME POSTER */}
                     <div
-                      className="relative aspect-[3/4]
-                                 w-full overflow-hidden
-                                 bg-black"
+                      className="
+  relative w-full overflow-hidden bg-black
+  aspect-[4/3]
+  sm:aspect-[3/4]
+"
                     >
                       <LoadableImage
                         src={pick.poster}

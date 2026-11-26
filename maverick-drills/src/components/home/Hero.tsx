@@ -244,8 +244,8 @@ export default function Hero({
             className="
               w-full max-w-[820px]
               font-display font-black uppercase
-              text-[clamp(2.75rem,5vw,6.5rem)]
-              leading-[0.98]
+              text-[clamp(2.4rem,5vw,6.5rem)]
+leading-[1.05] sm:leading-[0.98]
               tracking-[-0.05em]
               text-white break-words
 
@@ -327,7 +327,7 @@ export default function Hero({
       </div>
 
       {/* BOTTOM CAROUSEL CONTROLS */}
-      <div className="absolute inset-x-0 bottom-6 z-30">
+      <div className="absolute inset-x-0 bottom-9 z-30 sm:bottom-6">
         <div
           className="
             mx-auto flex w-full max-w-7xl

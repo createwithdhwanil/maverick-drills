@@ -140,8 +140,7 @@ export default function ExclusivesTeaser() {
                         playsInline
                         preload="metadata"
                         wrapperClassName="
-    aspect-video w-full
-    overflow-hidden
+    aspect-video w-full overflow-hidden
     bg-[#08090C]
     [&_video]:h-full
     [&_video]:w-full
