@@ -23,9 +23,16 @@ export default function LatestUploads() {
       />
 
       <div
-        className="relative mx-auto max-w-7xl
-                   px-5 py-20 sm:px-8
-                   lg:px-12 lg:py-28"
+        className="
+  relative mx-auto w-full
+  max-w-7xl
+  px-5 py-16
+  sm:px-8 sm:py-20
+  lg:px-12 lg:py-24
+  2xl:max-w-[1536px]
+  min-[2000px]:max-w-[1760px]
+  min-[2000px]:px-16
+"
       >
         {/* SECTION HEADER */}
         <Reveal>

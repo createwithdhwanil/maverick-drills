@@ -27,9 +27,15 @@ export default function Nav() {
                  backdrop-blur-xl"
     >
       <div
-        className="mx-auto flex min-h-17 max-w-7xl
-                   items-center justify-between gap-4
-                   px-4 sm:px-6 lg:px-8"
+        className="
+    mx-auto flex min-h-17 w-full
+    max-w-7xl items-center
+    justify-between gap-4
+    px-5 sm:px-8 lg:px-12
+    2xl:max-w-[1536px]
+    min-[2000px]:max-w-[1760px]
+    min-[2000px]:px-16
+  "
       >
         {/* BRAND WORDMARK */}
         <Link
