@@ -344,3 +344,604 @@ button {
     display: none;
   }
 }
+
+/* ======================================================
+   MAVERICK DRILLS — LIVING CINEMATIC BACKGROUND
+   Global ambient effects across every page
+====================================================== */
+
+.md-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+
+  contain: paint;
+}
+
+/* ======================================================
+   01 / DRIFTING CRIMSON LIGHT
+====================================================== */
+
+.md-ambient__glow {
+  position: absolute;
+  width: 85vmax;
+  height: 85vmax;
+
+  border-radius: 50%;
+  pointer-events: none;
+
+  transform: translate3d(0, 0, 0);
+}
+
+.md-ambient__glow--one {
+  top: -48vmax;
+  left: -40vmax;
+
+  background: radial-gradient(
+    circle,
+    rgba(229, 9, 36, 0.085) 0%,
+    rgba(150, 6, 25, 0.04) 30%,
+    transparent 68%
+  );
+
+  animation: md-ambient-drift-one 34s ease-in-out infinite alternate;
+}
+
+.md-ambient__glow--two {
+  right: -42vmax;
+  bottom: -50vmax;
+
+  background: radial-gradient(
+    circle,
+    rgba(229, 9, 36, 0.07) 0%,
+    rgba(115, 8, 25, 0.035) 36%,
+    transparent 70%
+  );
+
+  animation: md-ambient-drift-two 42s ease-in-out infinite alternate;
+}
+
+@keyframes md-ambient-drift-one {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(22vw, 16vh, 0) scale(1.12);
+  }
+
+  100% {
+    transform: translate3d(45vw, 28vh, 0) scale(0.92);
+  }
+}
+
+@keyframes md-ambient-drift-two {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-18vw, -20vh, 0) scale(1.12);
+  }
+
+  100% {
+    transform: translate3d(-38vw, -34vh, 0) scale(0.95);
+  }
+}
+
+/* ======================================================
+   02 / SUBTLE TECHNICAL GRID
+====================================================== */
+
+.md-ambient__grid {
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+
+  background-size: 80px 80px;
+
+  -webkit-mask-image: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(0, 0, 0, 0.75),
+    transparent 85%
+  );
+
+  mask-image: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(0, 0, 0, 0.75),
+    transparent 85%
+  );
+
+  opacity: 0.55;
+}
+
+/* ======================================================
+   03 / SLOW CINEMATIC LIGHT SWEEP
+====================================================== */
+
+.md-ambient__beam {
+  position: absolute;
+  inset: -60%;
+
+  background: linear-gradient(
+    115deg,
+    transparent 42%,
+    rgba(229, 9, 36, 0.018) 48%,
+    rgba(229, 9, 36, 0.032) 50%,
+    rgba(229, 9, 36, 0.018) 52%,
+    transparent 58%
+  );
+
+  transform: translate3d(-40%, 0, 0);
+
+  animation: md-ambient-sweep 32s linear infinite;
+}
+
+@keyframes md-ambient-sweep {
+  0% {
+    transform: translate3d(-45%, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(45%, 0, 0);
+  }
+}
+
+/* ======================================================
+   04 / FLOATING ATMOSPHERIC PARTICLES
+====================================================== */
+
+.md-ambient__particles {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0.55;
+}
+
+.md-ambient__particle {
+  position: absolute;
+  display: block;
+
+  width: 2px;
+  height: 2px;
+
+  border-radius: 50%;
+
+  background: rgba(229, 9, 36, 0.65);
+
+  opacity: 0;
+
+  animation: md-ambient-particle 24s ease-in-out infinite;
+}
+
+.md-ambient__particle:nth-child(3n) {
+  width: 1px;
+  height: 1px;
+
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.md-ambient__particle:nth-child(4n) {
+  width: 3px;
+  height: 3px;
+
+  background: rgba(229, 9, 36, 0.35);
+}
+
+@keyframes md-ambient-particle {
+  0% {
+    transform: translate3d(0, 16px, 0);
+    opacity: 0;
+  }
+
+  25% {
+    opacity: 0.65;
+  }
+
+  65% {
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: translate3d(12px, -55px, 0);
+    opacity: 0;
+  }
+}
+
+/* ======================================================
+   05 / MOBILE PERFORMANCE
+====================================================== */
+
+@media (max-width: 767px) {
+  .md-ambient__glow {
+    width: 100vmax;
+    height: 100vmax;
+  }
+
+  .md-ambient__glow--one {
+    background: radial-gradient(
+      circle,
+      rgba(229, 9, 36, 0.07),
+      transparent 67%
+    );
+  }
+
+  .md-ambient__glow--two {
+    opacity: 0.55;
+  }
+
+  .md-ambient__grid {
+    background-size: 64px 64px;
+    opacity: 0.3;
+  }
+
+  .md-ambient__beam {
+    display: none;
+  }
+
+  .md-ambient__particle:nth-child(n + 7) {
+    display: none;
+  }
+}
+
+/* ======================================================
+   06 / REDUCED MOTION ACCESSIBILITY
+====================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .md-ambient__glow,
+  .md-ambient__beam,
+  .md-ambient__particle {
+    animation: none !important;
+  }
+
+  .md-ambient__glow--one,
+  .md-ambient__glow--two {
+    transform: none !important;
+  }
+
+  .md-ambient__beam,
+  .md-ambient__particles {
+    display: none;
+  }
+}
+
+/* ================================================
+   MAVERICK DRILLS — AUDIO REACTIVE ATMOSPHERE
+================================================ */
+
+.md-beat-atmosphere {
+  --md-bass: 0;
+  --md-energy: 0;
+  --md-beat: 0;
+
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  contain: paint;
+}
+
+/* Fine tactical grid */
+.md-beat-atmosphere__grid {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0.22;
+
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+
+  background-size: 72px 72px;
+
+  mask-image: radial-gradient(ellipse at center, black 15%, transparent 80%);
+}
+
+/* Slowly drifting red nebula lights */
+.md-beat-atmosphere__glow {
+  position: absolute;
+  width: 75vmax;
+  height: 75vmax;
+
+  border-radius: 50%;
+
+  opacity: calc(0.6 + var(--md-bass) * 0.65);
+
+  background: radial-gradient(
+    circle,
+    rgba(229, 9, 36, 0.13) 0%,
+    rgba(145, 6, 30, 0.055) 32%,
+    transparent 70%
+  );
+}
+
+.md-beat-atmosphere__glow--left {
+  top: -38vmax;
+  left: -38vmax;
+
+  animation: md-beat-drift-left 32s ease-in-out infinite alternate;
+}
+
+.md-beat-atmosphere__glow--right {
+  right: -38vmax;
+  bottom: -42vmax;
+
+  animation: md-beat-drift-right 38s ease-in-out infinite alternate;
+}
+
+@keyframes md-beat-drift-left {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(40vw, 28vh, 0);
+  }
+}
+
+@keyframes md-beat-drift-right {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-35vw, -30vh, 0);
+  }
+}
+
+/* Bass-responsive central crimson bloom */
+.md-beat-atmosphere__pulse {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  width: 80vmax;
+  height: 80vmax;
+
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle,
+    rgba(229, 9, 36, 0.16) 0%,
+    rgba(229, 9, 36, 0.06) 30%,
+    transparent 68%
+  );
+
+  transform: translate3d(-50%, -50%, 0) scale(calc(0.9 + var(--md-bass) * 0.3));
+
+  opacity: calc(var(--md-bass) * 0.65 + var(--md-beat) * 0.35);
+}
+
+/* Moving cinematic streak */
+.md-beat-atmosphere__streak {
+  position: absolute;
+  inset: -70%;
+
+  background: linear-gradient(
+    115deg,
+    transparent 44%,
+    rgba(229, 9, 36, 0.035) 50%,
+    transparent 56%
+  );
+
+  opacity: calc(0.2 + var(--md-energy) * 0.7);
+
+  animation: md-beat-streak 28s linear infinite;
+}
+
+@keyframes md-beat-streak {
+  from {
+    transform: translate3d(-35%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(35%, 0, 0);
+  }
+}
+
+/* ================================================
+   SOUND SYSTEM — FLOATING CONTROLS
+================================================ */
+
+.md-sound-control {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+
+  z-index: 45;
+
+  display: flex;
+  width: min(300px, calc(100vw - 32px));
+
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.md-sound-control__actions {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.md-sound-control__settings,
+.md-sound-control__play {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(12, 13, 18, 0.94);
+  color: #fff;
+
+  backdrop-filter: blur(14px);
+
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease;
+}
+
+.md-sound-control__settings {
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.md-sound-control__play {
+  gap: 10px;
+  padding: 0 15px;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.md-sound-control__settings:hover,
+.md-sound-control__play:hover {
+  border-color: #e50924;
+}
+
+.md-sound-control__play.is-playing {
+  border-color: rgba(229, 9, 36, 0.65);
+}
+
+.md-sound-control__indicator {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+  background: #747985;
+}
+
+.is-playing .md-sound-control__indicator {
+  background: #e50924;
+  box-shadow: 0 0 12px rgba(229, 9, 36, 0.6);
+}
+
+.md-sound-control__panel {
+  width: 100%;
+  padding: 18px;
+
+  border: 1px solid rgba(229, 9, 36, 0.3);
+  background: rgba(10, 11, 15, 0.97);
+
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(18px);
+}
+
+/* ================================================
+   MINI EQUALIZER
+================================================ */
+
+.md-sound-bars {
+  display: inline-flex;
+  height: 17px;
+  align-items: center;
+  gap: 3px;
+}
+
+.md-sound-bars i {
+  display: block;
+
+  width: 2px;
+  height: 5px;
+
+  background: #e50924;
+  border-radius: 2px;
+}
+
+.md-sound-bars i:nth-child(2) {
+  height: 9px;
+}
+
+.md-sound-bars i:nth-child(3) {
+  height: 14px;
+}
+
+.md-sound-bars i:nth-child(4) {
+  height: 8px;
+}
+
+.md-sound-bars i:nth-child(5) {
+  height: 11px;
+}
+
+.md-sound-bars--playing i {
+  animation: md-sound-eq 650ms ease-in-out infinite alternate;
+}
+
+.md-sound-bars--playing i:nth-child(2) {
+  animation-delay: -180ms;
+}
+
+.md-sound-bars--playing i:nth-child(3) {
+  animation-delay: -330ms;
+}
+
+.md-sound-bars--playing i:nth-child(4) {
+  animation-delay: -110ms;
+}
+
+.md-sound-bars--playing i:nth-child(5) {
+  animation-delay: -460ms;
+}
+
+@keyframes md-sound-eq {
+  from {
+    transform: scaleY(0.35);
+  }
+
+  to {
+    transform: scaleY(1.15);
+  }
+}
+
+/* ================================================
+   MOBILE + REDUCED MOTION
+================================================ */
+
+@media (max-width: 767px) {
+  .md-beat-atmosphere__glow {
+    width: 85vmax;
+    height: 85vmax;
+    opacity: 0.45;
+  }
+
+  .md-beat-atmosphere__grid {
+    opacity: 0.12;
+  }
+
+  .md-beat-atmosphere__streak {
+    display: none;
+  }
+
+  .md-beat-atmosphere__pulse {
+    width: 75vmax;
+    height: 75vmax;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-beat-atmosphere__glow,
+  .md-beat-atmosphere__streak,
+  .md-sound-bars i {
+    animation: none !important;
+  }
+
+  .md-beat-atmosphere__pulse {
+    display: none;
+  }
+}
