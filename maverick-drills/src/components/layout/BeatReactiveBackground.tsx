@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const AUDIO_SOURCE = "/public/audio/maverick-theme.mp3";
-const INITIAL_VOLUME = 0.4;
+const AUDIO_SOURCE =
+  "/public/audio/Unknown Brain - Superhero (feat. Chris Linton) Trap NCS - Copyright Free Music.mp3";
+const DEFAULT_VOLUME = 0.4;
 
 export default function BeatReactiveBackground() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -13,10 +14,29 @@ export default function BeatReactiveBackground() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const frameRef = useRef<number | null>(null);
 
+  const playbackPendingRef = useRef(false);
+  const mountedRef = useRef(false);
+
   const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(INITIAL_VOLUME);
-  const [error, setError] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [volume, setVolume] = useState(DEFAULT_VOLUME);
+  const [error, setError] = useState<string | null>(null);
+
+  const stopVisualizer = useCallback(() => {
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+
+    const element = atmosphereRef.current;
+
+    if (element) {
+      element.style.setProperty("--md-bass", "0");
+      element.style.setProperty("--md-energy", "0");
+      element.style.setProperty("--md-beat", "0");
+    }
+  }, []);
 
   const startVisualizer = useCallback(() => {
     if (frameRef.current !== null) return;
@@ -26,52 +46,39 @@ export default function BeatReactiveBackground() {
 
     if (!analyser || !atmosphere) return;
 
-    const data = new Uint8Array(analyser.frequencyBinCount);
+    const frequencies = new Uint8Array(analyser.frequencyBinCount);
 
     let smoothBass = 0;
     let smoothEnergy = 0;
     let baseline = 0.12;
-    let lastBeat = 0;
     let beatFlash = 0;
+    let lastBeat = 0;
 
     function animate(time: number) {
       if (!analyser || !atmosphere) return;
 
-      analyser.getByteFrequencyData(data);
+      analyser.getByteFrequencyData(frequencies);
 
-      // FFT size is 1024. Low bins hold most
-      // kick and bass energy for typical music.
-      let bassSum = 0;
-      let bassCount = 0;
+      let bassTotal = 0;
+      let energyTotal = 0;
 
-      for (let index = 1; index <= 6; index++) {
-        bassSum += data[index] ?? 0;
-        bassCount++;
+      for (let i = 1; i <= 6; i++) {
+        bassTotal += frequencies[i] ?? 0;
       }
 
-      let energySum = 0;
-      let energyCount = 0;
-
-      for (let index = 7; index <= 65; index++) {
-        energySum += data[index] ?? 0;
-        energyCount++;
+      for (let i = 7; i <= 65; i++) {
+        energyTotal += frequencies[i] ?? 0;
       }
 
-      const bass = bassSum / Math.max(1, bassCount) / 255;
-
-      const energy = energySum / Math.max(1, energyCount) / 255;
+      const bass = bassTotal / 6 / 255;
+      const energy = energyTotal / 59 / 255;
 
       smoothBass += (bass - smoothBass) * 0.18;
       smoothEnergy += (energy - smoothEnergy) * 0.14;
 
-      // Maintain a rolling baseline to detect
-      // bass transients, rather than only volume.
       baseline += (bass - baseline) * 0.015;
 
-      const isBeat =
-        bass > 0.22 && bass > baseline * 1.32 && time - lastBeat > 220;
-
-      if (isBeat) {
+      if (bass > 0.22 && bass > baseline * 1.32 && time - lastBeat > 220) {
         lastBeat = time;
         beatFlash = 1;
       }
@@ -84,29 +91,18 @@ export default function BeatReactiveBackground() {
 
       atmosphere.style.setProperty("--md-beat", beatFlash.toFixed(3));
 
-      frameRef.current = window.requestAnimationFrame(animate);
+      frameRef.current = requestAnimationFrame(animate);
     }
 
-    frameRef.current = window.requestAnimationFrame(animate);
+    frameRef.current = requestAnimationFrame(animate);
   }, []);
 
-  const stopVisualizer = useCallback(() => {
-    if (frameRef.current !== null) {
-      window.cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-    }
-
-    const atmosphere = atmosphereRef.current;
-
-    atmosphere?.style.setProperty("--md-bass", "0");
-    atmosphere?.style.setProperty("--md-energy", "0");
-    atmosphere?.style.setProperty("--md-beat", "0");
-  }, []);
-
-  function prepareAudioGraph() {
+  const prepareAudioGraph = useCallback(() => {
     const audio = audioRef.current;
 
-    if (!audio) return null;
+    if (!audio) {
+      throw new Error("Audio element is unavailable.");
+    }
 
     if (contextRef.current) {
       return contextRef.current;
@@ -127,79 +123,116 @@ export default function BeatReactiveBackground() {
     analyserRef.current = analyser;
 
     return context;
-  }
+  }, []);
 
-  async function togglePlayback() {
+  const togglePlayback = async () => {
     const audio = audioRef.current;
 
-    if (!audio) return;
+    if (!audio || playbackPendingRef.current) return;
 
     if (!audio.paused) {
       audio.pause();
       return;
     }
 
-    try {
-      setError(false);
+    playbackPendingRef.current = true;
+    setBusy(true);
+    setError(null);
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    try {
       const context = prepareAudioGraph();
 
-      if (!context) return;
+      // Start both operations from the click gesture.
+      const resumePromise = context.resume();
+      const playPromise = audio.play();
 
-      // Both operations are initiated by the
-      // user's Play click.
-      await Promise.all([context.resume(), audio.play()]);
-    } catch (playbackError) {
-      console.error("Maverick audio playback failed:", playbackError);
+      // Prevent a permanently stuck loading button.
+      const timeout = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error("Audio loading timed out. Check the MP3 response."));
+        }, 8000);
+      });
+
+      await Promise.race([Promise.all([resumePromise, playPromise]), timeout]);
+
+      if (mountedRef.current) {
+        setPlaying(true);
+        startVisualizer();
+      }
+    } catch (caught) {
+      const message =
+        caught instanceof Error ? caught.message : "Unknown audio error";
+
+      console.error("Maverick audio error:", caught);
 
       audio.pause();
-      setError(true);
-      setPlaying(false);
       stopVisualizer();
+
+      if (mountedRef.current) {
+        setPlaying(false);
+        setError(message);
+        setExpanded(true);
+      }
+    } finally {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+
+      playbackPendingRef.current = false;
+
+      if (mountedRef.current) {
+        setBusy(false);
+      }
     }
-  }
+  };
 
-  function changeVolume(next: number) {
-    const clamped = Math.min(1, Math.max(0, next));
+  function changeVolume(value: number) {
+    const next = Math.min(1, Math.max(0, value));
 
-    setVolume(clamped);
+    setVolume(next);
 
     if (audioRef.current) {
-      audioRef.current.volume = clamped;
+      audioRef.current.volume = next;
     }
   }
 
   useEffect(() => {
+    mountedRef.current = true;
+
     const audio = audioRef.current;
 
     if (!audio) return;
 
-    audio.volume = INITIAL_VOLUME;
+    audio.volume = DEFAULT_VOLUME;
 
-    const onVisibilityChange = () => {
+    function onVisibilityChange() {
       if (document.hidden) {
-        audio.pause();
+        audio?.pause();
       }
-    };
+    }
 
     document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
+      mountedRef.current = false;
+
       document.removeEventListener("visibilitychange", onVisibilityChange);
 
       audio.pause();
 
       if (frameRef.current !== null) {
-        window.cancelAnimationFrame(frameRef.current);
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
       }
 
-      frameRef.current = null;
-
       const context = contextRef.current;
+
       contextRef.current = null;
       analyserRef.current = null;
 
-      if (context) {
+      if (context && context.state !== "closed") {
         void context.close().catch(() => {});
       }
     };
@@ -207,24 +240,29 @@ export default function BeatReactiveBackground() {
 
   return (
     <>
-      {/* Decorative, non-interactive background */}
+      {/* GLOBAL REACTIVE BACKGROUND */}
       <div
         ref={atmosphereRef}
-        aria-hidden="true"
-        data-beat-active={playing}
         className="md-beat-atmosphere"
+        data-beat-active={playing}
+        aria-hidden="true"
       >
         <div className="md-beat-atmosphere__grid" />
+
         <div className="md-beat-atmosphere__glow md-beat-atmosphere__glow--left" />
+
         <div className="md-beat-atmosphere__glow md-beat-atmosphere__glow--right" />
+
         <div className="md-beat-atmosphere__pulse" />
+
         <div className="md-beat-atmosphere__streak" />
       </div>
 
+      {/* MUSIC */}
       <audio
         ref={audioRef}
         src={AUDIO_SOURCE}
-        preload="none"
+        preload="metadata"
         loop
         onPlay={() => {
           setPlaying(true);
@@ -235,13 +273,14 @@ export default function BeatReactiveBackground() {
           stopVisualizer();
         }}
         onError={() => {
-          setError(true);
           setPlaying(false);
           stopVisualizer();
+
+          setError("Unable to load the soundtrack. Check the MP3 file.");
         }}
       />
 
-      {/* Global music control */}
+      {/* FLOATING AUDIO CONTROLS */}
       <div className="md-sound-control">
         {expanded && (
           <div id="md-sound-settings" className="md-sound-control__panel">
@@ -250,6 +289,7 @@ export default function BeatReactiveBackground() {
                 <p className="font-heading text-[10px] uppercase tracking-wider text-red">
                   MAVERICK AUDIO
                 </p>
+
                 <p className="mt-1 font-body text-xs text-white/70">
                   Cinematic sound system
                 </p>
@@ -292,8 +332,7 @@ export default function BeatReactiveBackground() {
                 role="alert"
                 className="mt-3 font-body text-xs leading-relaxed text-red"
               >
-                Couldn't load the soundtrack. Check
-                public/audio/maverick-theme.mp3.
+                {error}
               </p>
             )}
           </div>
@@ -302,10 +341,10 @@ export default function BeatReactiveBackground() {
         <div className="md-sound-control__actions">
           <button
             type="button"
-            onClick={() => setExpanded((value) => !value)}
             aria-label="Music settings"
             aria-expanded={expanded}
             aria-controls="md-sound-settings"
+            onClick={() => setExpanded((value) => !value)}
             className="md-sound-control__settings"
           >
             <svg
@@ -327,6 +366,7 @@ export default function BeatReactiveBackground() {
 
           <button
             type="button"
+            disabled={busy}
             onClick={togglePlayback}
             aria-label={
               playing ? "Pause background music" : "Play background music"
@@ -336,7 +376,7 @@ export default function BeatReactiveBackground() {
           >
             <span aria-hidden="true" className="md-sound-control__indicator" />
 
-            <span>{playing ? "SOUND ON" : "SOUND OFF"}</span>
+            <span>{busy ? "LOADING" : playing ? "SOUND ON" : "SOUND OFF"}</span>
 
             <span
               aria-hidden="true"
