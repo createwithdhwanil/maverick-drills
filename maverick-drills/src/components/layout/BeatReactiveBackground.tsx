@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const AUDIO_SOURCE = "/audio/maverick-theme.mp3";
+const AUDIO_SOURCE = "/public/audio/maverick-theme.mp3";
 const INITIAL_VOLUME = 0.4;
 
 export default function BeatReactiveBackground() {
