@@ -1,15 +1,32 @@
-import type { Metadata } from "next";
-
 import { MONTH_LABEL, MONTHLY_PICKS } from "@/lib/data/recommendations";
 
 import MonthlyPicksExperience from "./MonthlyPicksExperience";
 
-export const metadata: Metadata = {
-  title: "Monthly Picks — Maverick Drills",
+import { createPageMetadata } from "../metadata";
+
+import { BreadcrumbStructuredData } from "../StructuredData";
+
+export const metadata = createPageMetadata({
+  title: "Monthly Gaming Picks",
   description:
-    "Discover the curated Maverick Drills monthly gaming rankings, exclusive recommendations, trailers, and game features.",
-};
+    "Discover Maverick Drills' curated monthly game rankings, gameplay recommendations, trailers and featured game selections.",
+  path: "/recommendations",
+});
 
 export default function RecommendationsPage() {
-  return <MonthlyPicksExperience month={MONTH_LABEL} picks={MONTHLY_PICKS} />;
+  return (
+    <>
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Home", path: "/" },
+          {
+            name: "Monthly Picks",
+            path: "/recommendations",
+          },
+        ]}
+      />
+
+      <MonthlyPicksExperience month={MONTH_LABEL} picks={MONTHLY_PICKS} />
+    </>
+  );
 }

@@ -10,6 +10,7 @@ import {
 import { LoadableImage, LoadableIframe } from "@/components/ui/LoadableMedia";
 import Reveal from "@/components/ui/Reveal";
 import PremiumTiltCard from "@/components/ui/PremiumTiltCard";
+import { createPageMetadata } from "../../metadata";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -27,14 +28,19 @@ export async function generateMetadata({ params }: PageProps) {
 
   if (!pick) {
     return {
-      title: "Game Not Found — Maverick Drills",
+      title: "Game Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
-  return {
-    title: `${pick.game} — Maverick Drills`,
+  return createPageMetadata({
+    title: pick.game,
     description: pick.blurb,
-  };
+    path: `/recommendations/${pick.slug}`,
+  });
 }
 
 export default async function MonthlyPickPage({ params }: PageProps) {

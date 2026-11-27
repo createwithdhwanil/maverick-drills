@@ -8,6 +8,10 @@ import Nav from "@/components/layout/Nav";
 import Footer from "@/components/layout/Footer";
 import BeatReactiveBackground from "@/components/layout/BeatReactiveBackground";
 
+import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo/site";
+
+import { WebsiteStructuredData } from "./StructuredData";
+
 const bungee = Bungee({
   weight: "400",
   subsets: ["latin"],
@@ -26,28 +30,55 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
+
   title: {
-    default: "Maverick Drills | Beyond the Game",
-    template: "%s | Maverick Drills",
+    default: `${SITE_NAME} | Beyond the Game`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Discover cinematic gameplay, gaming originals, stunning screenshots and curated game recommendations from Maverick Drills.",
-  applicationName: "Maverick Drills",
+
+  description: SITE_DESCRIPTION,
+
+  applicationName: SITE_NAME,
+
+  alternates: {
+    canonical: "/",
+  },
+
   openGraph: {
     type: "website",
-    siteName: "Maverick Drills",
-    title: "Maverick Drills | Beyond the Game",
-    description:
-      "Cinematic gameplay, gaming originals and curated game discoveries.",
+    siteName: SITE_NAME,
+    locale: "en_US",
+    title: `${SITE_NAME} | Beyond the Game`,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — Beyond the Game`,
+      },
+    ],
   },
+
   twitter: {
-    card: "summary",
-    title: "Maverick Drills | Beyond the Game",
-    description: "Go beyond the game with Maverick Drills.",
+    card: "summary_large_image",
+    title: `${SITE_NAME} | Beyond the Game`,
+    description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
+
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 
@@ -63,20 +94,20 @@ export default function RootLayout({
           ${bungee.variable}
           ${archivoBlack.variable}
           ${dmSans.variable}
-          min-h-screen bg-background
-          text-foreground antialiased
+          antialiased
         `}
       >
-        {/* One global audio-reactive atmosphere */}
+        <WebsiteStructuredData />
+
+        {/* Existing audio-reactive atmosphere */}
         <BeatReactiveBackground />
 
-        {/* Subtle cinematic film grain */}
+        {/* Existing cinematic grain overlay */}
         <div
           aria-hidden="true"
           className="
-            pointer-events-none
-            fixed inset-0 z-[60]
-            opacity-[0.035]
+            pointer-events-none fixed inset-0
+            z-[60] opacity-[0.035]
             mix-blend-overlay
           "
           style={{
