@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const AUDIO_SOURCE =
-  "/public/audio/Unknown Brain - Superhero (feat. Chris Linton) Trap NCS - Copyright Free Music.mp3";
+const AUDIO_SOURCE = "/audio/background-music.mp3";
 const DEFAULT_VOLUME = 0.4;
 
 const AUDIO_TIMEOUT_MS = 15000;
@@ -44,44 +43,8 @@ export default function BeatReactiveBackground() {
       element.style.setProperty("--md-bass", "0");
       element.style.setProperty("--md-energy", "0");
       element.style.setProperty("--md-beat", "0");
+      element.style.setProperty("--md-impact", "0");
     }
-  }, []);
-
-  /* ==========================================
-     WEB AUDIO ANALYSER
-  ========================================== */
-
-  const prepareAudioGraph = useCallback(() => {
-    const audio = audioRef.current;
-
-    if (!audio) return null;
-
-    if (contextRef.current) {
-      return contextRef.current;
-    }
-
-    const AudioContextClass = window.AudioContext;
-
-    if (!AudioContextClass) {
-      return null;
-    }
-
-    const context = new AudioContextClass();
-
-    const analyser = context.createAnalyser();
-
-    analyser.fftSize = 1024;
-    analyser.smoothingTimeConstant = 0.76;
-
-    const source = context.createMediaElementSource(audio);
-
-    source.connect(analyser);
-    analyser.connect(context.destination);
-
-    contextRef.current = context;
-    analyserRef.current = analyser;
-
-    return context;
   }, []);
 
   /* ==========================================
@@ -96,58 +59,111 @@ export default function BeatReactiveBackground() {
 
     if (!analyser || !atmosphere) return;
 
+    // Respect visitors who prefer reduced motion.
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reduceMotion) return;
+
     visualizerRunningRef.current = true;
 
     const frequencies = new Uint8Array(analyser.frequencyBinCount);
 
+    // Increase for more visible reactions.
+    const REACTIVITY = 1.8;
+
     let smoothBass = 0;
     let smoothEnergy = 0;
-    let baseline = 0.1;
+    let averageBass = 0.08;
+    let previousBass = 0;
     let beatFlash = 0;
-    let lastBeat = 0;
+    let lastBeatTime = -1000;
 
-    const animate = (time: number) => {
+    // Convert a frequency in Hz to an FFT bin.
+    const binForHz = (hz: number) =>
+      Math.max(
+        1,
+        Math.min(
+          frequencies.length - 1,
+          Math.round((hz * analyser.fftSize) / analyser.context.sampleRate),
+        ),
+      );
+
+    const bassStart = binForHz(40);
+    const bassEnd = binForHz(170);
+    const midStart = binForHz(170);
+    const midEnd = binForHz(2500);
+
+    function averageRange(start: number, end: number) {
+      let sum = 0;
+      let count = 0;
+
+      for (let i = start; i <= end; i++) {
+        sum += frequencies[i] ?? 0;
+        count++;
+      }
+
+      return count > 0 ? sum / count / 255 : 0;
+    }
+
+    function animate(time: number) {
       if (!visualizerRunningRef.current) return;
 
-      analyser.getByteFrequencyData(frequencies);
+      analyser!.getByteFrequencyData(frequencies);
 
-      let bassTotal = 0;
-      let energyTotal = 0;
+      const rawBass = averageRange(bassStart, bassEnd);
 
-      for (let i = 1; i <= 6; i++) {
-        bassTotal += frequencies[i] ?? 0;
-      }
+      const rawEnergy = averageRange(midStart, midEnd);
 
-      for (let i = 7; i <= 65; i++) {
-        energyTotal += frequencies[i] ?? 0;
-      }
+      // Dynamic baseline helps accommodate
+      // different tracks and mastering levels.
+      averageBass += (rawBass - averageBass) * 0.018;
 
-      const bass = bassTotal / 6 / 255;
-      const energy = energyTotal / 59 / 255;
+      const bassRise = rawBass - previousBass;
 
-      smoothBass += (bass - smoothBass) * 0.18;
-      smoothEnergy += (energy - smoothEnergy) * 0.14;
-
-      baseline += (bass - baseline) * 0.015;
-
+      // Beat detection responds to sudden bass
+      // transients instead of constant loudness.
       const beatDetected =
-        bass > 0.2 && bass > baseline * 1.25 && time - lastBeat > 230;
+        rawBass > 0.12 &&
+        ((rawBass > averageBass * 1.18 && bassRise > 0.025) ||
+          bassRise > 0.09) &&
+        time - lastBeatTime > 230;
 
       if (beatDetected) {
-        lastBeat = time;
+        lastBeatTime = time;
         beatFlash = 1;
       }
 
-      beatFlash *= 0.87;
+      // Fast attack, smooth release.
+      const bassTarget = Math.min(1, rawBass * REACTIVITY);
 
-      atmosphere.style.setProperty("--md-bass", smoothBass.toFixed(3));
+      const energyTarget = Math.min(1, rawEnergy * REACTIVITY);
 
-      atmosphere.style.setProperty("--md-energy", smoothEnergy.toFixed(3));
+      smoothBass +=
+        (bassTarget - smoothBass) * (bassTarget > smoothBass ? 0.42 : 0.16);
 
-      atmosphere.style.setProperty("--md-beat", beatFlash.toFixed(3));
+      smoothEnergy += (energyTarget - smoothEnergy) * 0.2;
+
+      // Visible short-lived shockwave.
+      beatFlash *= 0.88;
+
+      atmosphere!.style.setProperty("--md-bass", smoothBass.toFixed(3));
+
+      atmosphere!.style.setProperty("--md-energy", smoothEnergy.toFixed(3));
+
+      atmosphere!.style.setProperty("--md-beat", beatFlash.toFixed(3));
+
+      // Additional intensity variable for rings.
+      atmosphere!.style.setProperty(
+        "--md-impact",
+        Math.min(1, smoothBass * 0.55 + beatFlash * 0.75).toFixed(3),
+      );
+
+      previousBass = rawBass;
 
       frameRef.current = requestAnimationFrame(animate);
-    };
+    }
 
     frameRef.current = requestAnimationFrame(animate);
   }, []);
@@ -237,7 +253,7 @@ export default function BeatReactiveBackground() {
 
       if (playbackError.name === "NotSupportedError") {
         message =
-          "This audio format isn't supported. Check or re-encode maverick-theme.mp3.";
+          "This audio format isn't supported. Check or re-encode ckmaveri-theme.mp3.";
       } else if (playbackError.name === "NotAllowedError") {
         message = "Browser blocked playback. Please press Play again.";
       } else if (playbackError.name === "AbortError") {
@@ -336,6 +352,11 @@ export default function BeatReactiveBackground() {
         <div className="md-beat-atmosphere__pulse" />
 
         <div className="md-beat-atmosphere__streak" />
+        {/* Bass-driven shockwaves */}
+        <div className="md-beat-atmosphere__shockwave" />
+
+        {/* Additional red light bloom */}
+        <div className="md-beat-atmosphere__core" />
       </div>
 
       {/* SOUNDTRACK */}

@@ -945,3 +945,237 @@ button {
     display: none;
   }
 }
+
+/* ====================================================
+   MAVERICK DRILLS — BEAT REACTOR 2.0
+   Stronger, music-synchronized cinematic atmosphere
+==================================================== */
+
+.md-beat-atmosphere {
+  --md-bass: 0;
+  --md-energy: 0;
+  --md-beat: 0;
+  --md-impact: 0;
+
+  isolation: isolate;
+}
+
+/* ====================================================
+   01 / STRONGER ATMOSPHERIC RED LIGHT
+==================================================== */
+
+.md-beat-atmosphere__glow {
+  width: 85vmax;
+  height: 85vmax;
+
+  background: radial-gradient(
+    circle,
+    rgba(229, 9, 36, 0.22) 0%,
+    rgba(185, 8, 35, 0.11) 30%,
+    rgba(100, 5, 24, 0.04) 48%,
+    transparent 72%
+  );
+
+  opacity: calc(0.65 + var(--md-bass) * 0.7);
+}
+
+.md-beat-atmosphere__glow--left {
+  top: -35vmax;
+  left: -35vmax;
+}
+
+.md-beat-atmosphere__glow--right {
+  bottom: -40vmax;
+  right: -35vmax;
+}
+
+/* ====================================================
+   02 / EXPANDING BASS PULSE
+==================================================== */
+
+.md-beat-atmosphere__pulse {
+  width: 90vmax;
+  height: 90vmax;
+
+  background: radial-gradient(
+    circle,
+    rgba(229, 9, 36, 0.28) 0%,
+    rgba(229, 9, 36, 0.14) 22%,
+    rgba(130, 5, 30, 0.06) 45%,
+    transparent 70%
+  );
+
+  opacity: calc(var(--md-bass) * 0.55 + var(--md-beat) * 0.7);
+
+  transform: translate3d(-50%, -50%, 0) scale(calc(0.85 + var(--md-bass) * 0.5));
+}
+
+/* ====================================================
+   03 / NEW CRIMSON SHOCKWAVE
+==================================================== */
+
+.md-beat-atmosphere__shockwave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  width: min(88vw, 850px);
+  aspect-ratio: 1;
+
+  border-radius: 50%;
+  border: 1px solid rgba(229, 9, 36, 0.5);
+
+  box-shadow:
+    0 0 24px rgba(229, 9, 36, 0.09),
+    inset 0 0 24px rgba(229, 9, 36, 0.04);
+
+  opacity: calc(var(--md-beat) * 0.72);
+
+  transform: translate3d(-50%, -50%, 0)
+    scale(calc(0.65 + (1 - var(--md-beat)) * 0.9));
+
+  will-change: transform, opacity;
+}
+
+.md-beat-atmosphere__shockwave::before,
+.md-beat-atmosphere__shockwave::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.md-beat-atmosphere__shockwave::before {
+  inset: 12%;
+
+  border: 1px solid rgba(229, 9, 36, 0.32);
+}
+
+.md-beat-atmosphere__shockwave::after {
+  inset: 26%;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ====================================================
+   04 / REACTIVE CENTRAL LIGHT CORE
+==================================================== */
+
+.md-beat-atmosphere__core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  width: min(95vw, 950px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle,
+    rgba(229, 9, 36, 0.18) 0%,
+    rgba(229, 9, 36, 0.085) 25%,
+    rgba(229, 9, 36, 0.025) 48%,
+    transparent 70%
+  );
+
+  opacity: calc(0.08 + var(--md-impact) * 0.85);
+
+  transform: translate3d(-50%, -50%, 0)
+    scale(calc(0.8 + var(--md-impact) * 0.45));
+
+  will-change: transform, opacity;
+}
+
+/* ====================================================
+   05 / ENERGY-REACTIVE LIGHT STREAK
+==================================================== */
+
+.md-beat-atmosphere__streak {
+  background: linear-gradient(
+    115deg,
+    transparent 43%,
+    rgba(229, 9, 36, 0.02) 47%,
+    rgba(229, 9, 36, 0.07) 50%,
+    rgba(229, 9, 36, 0.02) 53%,
+    transparent 57%
+  );
+
+  opacity: calc(0.25 + var(--md-energy) * 0.8);
+}
+
+/* ====================================================
+   06 / MORE VISIBLE TECHNICAL GRID
+==================================================== */
+
+.md-beat-atmosphere__grid {
+  background-size: 64px 64px;
+
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+
+  opacity: calc(0.2 + var(--md-energy) * 0.22);
+}
+
+/* ====================================================
+   07 / MOBILE: KEEP THE EFFECT LIGHTWEIGHT
+==================================================== */
+
+@media (max-width: 767px) {
+  .md-beat-atmosphere__glow {
+    width: 95vmax;
+    height: 95vmax;
+
+    opacity: calc(0.35 + var(--md-bass) * 0.45);
+  }
+
+  .md-beat-atmosphere__pulse {
+    width: 90vmax;
+    height: 90vmax;
+
+    opacity: calc(var(--md-bass) * 0.3 + var(--md-beat) * 0.4);
+  }
+
+  .md-beat-atmosphere__shockwave {
+    width: 95vw;
+    opacity: calc(var(--md-beat) * 0.4);
+  }
+
+  .md-beat-atmosphere__core {
+    width: 100vw;
+    opacity: calc(var(--md-impact) * 0.5);
+  }
+
+  .md-beat-atmosphere__grid {
+    opacity: 0.12;
+  }
+
+  .md-beat-atmosphere__streak {
+    display: none;
+  }
+}
+
+/* ====================================================
+   08 / ACCESSIBILITY
+==================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .md-beat-atmosphere__shockwave,
+  .md-beat-atmosphere__core,
+  .md-beat-atmosphere__pulse {
+    display: none !important;
+  }
+
+  .md-beat-atmosphere__glow,
+  .md-beat-atmosphere__streak {
+    animation: none !important;
+  }
+
+  .md-beat-atmosphere__glow {
+    opacity: 0.35;
+  }
+
+  .md-beat-atmosphere__grid {
+    opacity: 0.12;
+  }
+}
