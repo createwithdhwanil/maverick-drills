@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,7 +13,7 @@ type NavLink = {
   label: string;
 };
 
-type MobileMenuToggleProps = {
+type Props = {
   links: NavLink[];
   youtubeUrl: string;
   instagramUrl: string;
@@ -22,85 +23,102 @@ export default function MobileMenuToggle({
   links,
   youtubeUrl,
   instagramUrl,
-}: MobileMenuToggleProps) {
-  const [open, setOpen] = useState(false);
+}: Props) {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const closeMenu = () => setOpen(false);
 
-  // Lock scrolling, manage focus and handle Escape.
+  // Close when the route changes.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpen(false);
+  }, [pathname]);
+
   useEffect(() => {
     if (!open) return;
 
     const previousOverflow = document.body.style.overflow;
-    const previousFocus = document.activeElement;
+
+    const previouslyFocused = document.activeElement;
 
     document.body.style.overflow = "hidden";
 
     const panel = panelRef.current;
 
-    const focusableSelector = [
-      "a[href]",
-      "button:not([disabled])",
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(",");
+    const closeButton = panel?.querySelector<HTMLButtonElement>(
+      '[data-menu-close="true"]',
+    );
 
-    panel
-      ?.querySelector<HTMLButtonElement>('[data-menu-close="true"]')
-      ?.focus();
+    closeButton?.focus();
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const getFocusable = () =>
+      Array.from(
+        panel?.querySelectorAll<HTMLElement>(
+          'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+
+    function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        closeMenu();
+        event.preventDefault();
+        setOpen(false);
         return;
       }
 
-      if (event.key !== "Tab" || !panel) return;
+      if (event.key !== "Tab") return;
 
-      const focusable = Array.from(
-        panel.querySelectorAll<HTMLElement>(focusableSelector),
-      );
+      const elements = getFocusable();
 
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
+      const first = elements[0];
+      const last = elements[elements.length - 1];
 
       if (!first || !last) return;
 
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
+      const active = document.activeElement;
+
+      if (event.shiftKey) {
+        if (active === first || !panel?.contains(active)) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last || !panel?.contains(active)) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    }
+
+    const onResize = () => {
+      if (window.innerWidth >= 1024) {
+        setOpen(false);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("resize", onResize);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
 
-      if (previousFocus instanceof HTMLElement) {
-        previousFocus.focus();
+      window.removeEventListener("keydown", onKeyDown);
+
+      window.removeEventListener("resize", onResize);
+
+      if (
+        previouslyFocused instanceof HTMLElement &&
+        previouslyFocused.isConnected
+      ) {
+        previouslyFocused.focus();
       } else {
         triggerRef.current?.focus();
       }
     };
   }, [open]);
-
-  // Close the menu when navigation changes.
-  const previousPathname = useRef(pathname);
-
-  useEffect(() => {
-    if (previousPathname.current !== pathname) {
-      previousPathname.current = pathname;
-      closeMenu();
-    }
-  }, [pathname]);
 
   const menuPanel = (
     <div
@@ -113,21 +131,34 @@ export default function MobileMenuToggle({
         fixed inset-0 z-[999]
         overflow-x-hidden overflow-y-auto
         overscroll-contain
-        bg-[#090A0D]
-        text-white
-        md:hidden
+        bg-[#090A0D] text-white
+
+        lg:hidden
+
         motion-safe:animate-[md-menu-in_350ms_ease-out_both]
       "
     >
       <style>{`
         @keyframes md-menu-in {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         @keyframes md-item-in {
-          from { opacity: 0; transform: translateY(18px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -138,17 +169,17 @@ export default function MobileMenuToggle({
         }
       `}</style>
 
-      {/* ATMOSPHERIC BACKGROUND */}
+      {/* BACKGROUND ATMOSPHERE */}
       <div
         aria-hidden="true"
         className="
-          pointer-events-none absolute inset-0
-          overflow-hidden
+          pointer-events-none
+          absolute inset-0 overflow-hidden
         "
       >
         <div
           className="
-            absolute -right-40 top-[15%]
+            absolute -right-32 top-[15%]
             h-[400px] w-[400px]
             rounded-full bg-red/15
             blur-[120px]
@@ -157,7 +188,7 @@ export default function MobileMenuToggle({
 
         <div
           className="
-            absolute -left-40 bottom-[10%]
+            absolute -left-32 bottom-[10%]
             h-[300px] w-[300px]
             rounded-full bg-red/5
             blur-[100px]
@@ -173,24 +204,25 @@ export default function MobileMenuToggle({
         />
       </div>
 
-      {/* MENU CONTENT */}
+      {/* MAIN CONTENT */}
       <div
         className="
           relative z-10 mx-auto
           flex min-h-[100svh] w-full
-          max-w-[650px] flex-col
+          max-w-[700px] flex-col
+
           px-5 pb-[max(24px,env(safe-area-inset-bottom))]
           pt-[max(20px,env(safe-area-inset-top))]
+
           sm:px-8
         "
       >
         {/* HEADER */}
         <div
           className="
-            flex min-h-16 items-center
-            justify-between gap-4
-            border-b border-white/10
-            pb-4
+            flex min-h-16
+            items-center justify-between
+            gap-4 border-b border-white/10 pb-4
           "
         >
           <Link
@@ -204,25 +236,24 @@ export default function MobileMenuToggle({
               sm:text-xl
             "
           >
-            <span className="text-white">MAVERICK</span>
-
+            <span>MAVERICK</span>
             <span className="text-red">DRILLS</span>
           </Link>
 
           <button
-            type="button"
             data-menu-close="true"
+            type="button"
             onClick={closeMenu}
             aria-label="Close navigation"
             className="
-              flex h-11 w-11 shrink-0
-              items-center justify-center
+              flex h-11 w-11
+              shrink-0 items-center justify-center
               rounded-full
-              border border-white/15
-              bg-white/5
-              text-white
 
-              transition-colors duration-200
+              border border-white/15
+              bg-white/5 text-white
+
+              transition-colors
               hover:border-red hover:bg-red
             "
           >
@@ -231,9 +262,8 @@ export default function MobileMenuToggle({
         </div>
 
         {/* EDITORIAL LABEL */}
-        <div className="mt-8 mb-5 flex items-center gap-3">
+        <div className="mb-5 mt-8 flex items-center gap-3">
           <span className="h-1.5 w-1.5 rounded-full bg-red" />
-
           <p
             className="
               font-body text-[10px]
@@ -246,8 +276,11 @@ export default function MobileMenuToggle({
           </p>
         </div>
 
-        {/* PRIMARY NAVIGATION */}
-        <nav aria-label="Mobile navigation" className="flex flex-col">
+        {/* NAVIGATION */}
+        <nav
+          aria-label="Mobile and tablet navigation"
+          className="flex flex-col"
+        >
           {links.map((link, index) => {
             const isActive =
               link.href === "/"
@@ -265,17 +298,14 @@ export default function MobileMenuToggle({
                   animationDelay: `${index * 65}ms`,
                 }}
                 className={`
-                  md-menu-item group
-                  relative flex min-h-[66px]
+                  md-menu-item group relative
+                  flex min-h-[66px]
                   items-center justify-between
-                  gap-3
-
-                  border-b border-white/10
-                  py-3
+                  gap-3 border-b border-white/10 py-3
 
                   motion-safe:animate-[md-item-in_450ms_ease-out_both]
 
-                  transition-colors duration-200
+                  transition-colors
 
                   ${isActive ? "text-red" : "text-white hover:text-red"}
                 `}
@@ -285,6 +315,7 @@ export default function MobileMenuToggle({
                     className={`
                       shrink-0 font-body
                       text-[10px] tracking-widest
+
                       ${isActive ? "text-red" : "text-white/35"}
                     `}
                   >
@@ -307,9 +338,10 @@ export default function MobileMenuToggle({
                   aria-hidden="true"
                   className={`
                     shrink-0
-                    transition-transform duration-200
+                    transition-transform
                     group-hover:translate-x-1
                     group-hover:-translate-y-1
+
                     ${isActive ? "text-red" : "text-white/35"}
                   `}
                 >
@@ -336,8 +368,7 @@ export default function MobileMenuToggle({
             className="
               border border-white/10
               bg-white/[0.035]
-              p-5
-              backdrop-blur-sm
+              p-5 backdrop-blur-sm
             "
           >
             <p
@@ -351,7 +382,7 @@ export default function MobileMenuToggle({
               FOLLOW THE JOURNEY
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="mt-4 flex gap-3">
               <a
                 href={youtubeUrl}
                 target="_blank"
@@ -363,10 +394,8 @@ export default function MobileMenuToggle({
                   items-center justify-center
                   border border-white/15
                   bg-white/5 text-white
-
-                  transition-all duration-200
-                  hover:border-red
-                  hover:bg-red
+                  transition-colors
+                  hover:border-red hover:bg-red
                 "
               >
                 <YouTubeIcon className="h-5 w-5" />
@@ -383,10 +412,8 @@ export default function MobileMenuToggle({
                   items-center justify-center
                   border border-white/15
                   bg-white/5 text-white
-
-                  transition-all duration-200
-                  hover:border-red
-                  hover:bg-red
+                  transition-colors
+                  hover:border-red hover:bg-red
                 "
               >
                 <InstagramIcon className="h-5 w-5" />
@@ -406,9 +433,9 @@ export default function MobileMenuToggle({
 
           <div
             className="
-              mt-6 flex items-center
-              justify-between gap-3
-              font-body text-[10px]
+              mt-6 flex flex-wrap
+              items-center justify-between gap-2
+              font-body text-[9px]
               uppercase tracking-[0.12em]
               text-white/35
             "
@@ -422,7 +449,7 @@ export default function MobileMenuToggle({
   );
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         ref={triggerRef}
         type="button"
@@ -434,8 +461,7 @@ export default function MobileMenuToggle({
           flex h-11 w-11
           items-center justify-center
           text-foreground
-
-          transition-colors duration-200
+          transition-colors
           hover:text-red
         "
       >
