@@ -1,12 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useState, type VideoHTMLAttributes } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type IframeHTMLAttributes,
+  type VideoHTMLAttributes,
+} from "react";
 
 import Image, { type ImageProps } from "next/image";
 
-/* ==========================================
-   LOADABLE IMAGE
-========================================== */
+/* =====================================================
+   MAVERICK DRILLS — LOADABLE MEDIA
+
+   Exports:
+   - LoadableImage
+   - LoadableVideo
+   - LoadableIframe
+===================================================== */
+
+/* =====================================================
+   01 / LOADABLE IMAGE
+===================================================== */
 
 export function LoadableImage({
   className = "",
@@ -14,8 +29,14 @@ export function LoadableImage({
   onError,
   ...props
 }: ImageProps) {
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [loadedSrc, setLoadedSrc] = useState<ImageProps["src"] | null>(null);
+
+  const [failedSrc, setFailedSrc] = useState<ImageProps["src"] | null>(null);
+
+  const currentSrc = props.src;
+
+  const loaded = loadedSrc === currentSrc;
+  const failed = failedSrc === currentSrc;
 
   return (
     <>
@@ -39,11 +60,12 @@ export function LoadableImage({
           ${className}
         `}
         onLoad={(event) => {
-          setLoaded(true);
+          setLoadedSrc(currentSrc);
+          setFailedSrc(null);
           onLoad?.(event);
         }}
         onError={(event) => {
-          setFailed(true);
+          setFailedSrc(currentSrc);
           onError?.(event);
         }}
       />
@@ -51,13 +73,15 @@ export function LoadableImage({
   );
 }
 
-/* ==========================================
-   LOADABLE VIDEO
-========================================== */
+/* =====================================================
+   02 / LOADABLE VIDEO
+===================================================== */
 
 type LoadableVideoProps = VideoHTMLAttributes<HTMLVideoElement> & {
   wrapperClassName?: string;
 };
+
+type VideoSource = NonNullable<VideoHTMLAttributes<HTMLVideoElement>["src"]>;
 
 export function LoadableVideo({
   wrapperClassName = "",
@@ -75,31 +99,42 @@ export function LoadableVideo({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [isNearViewport, setIsNearViewport] = useState(false);
+  // Correct source type:
+  // string | Blob | MediaSource | MediaStream
+  const [visibleSrc, setVisibleSrc] = useState<VideoSource | null>(null);
 
-  const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [readySrc, setReadySrc] = useState<VideoSource | null>(null);
+
+  const [failedSrc, setFailedSrc] = useState<VideoSource | null>(null);
+
   const [retryCount, setRetryCount] = useState(0);
 
-  /* ========================================
-     LOAD MEDIA NEAR THE VIEWPORT
-  ======================================== */
+  const hasSource = src != null;
+
+  const isNearViewport = hasSource && visibleSrc === src;
+
+  const ready = hasSource && readySrc === src;
+
+  const failed = hasSource && failedSrc === src;
+
+  /* ==========================================
+     LOAD VIDEO WHEN NEAR THE VIEWPORT
+  ========================================== */
 
   useEffect(() => {
     const element = wrapperRef.current;
 
-    if (!element) return;
+    if (!element || src == null) return;
 
     if (typeof IntersectionObserver === "undefined") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsNearViewport(true);
+      setVisibleSrc(src);
       return;
     }
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setIsNearViewport(true);
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setVisibleSrc(src);
           observer.disconnect();
         }
       },
@@ -112,109 +147,114 @@ export function LoadableVideo({
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, []);
+  }, [src]);
 
-  /* ========================================
+  /* ==========================================
+     INITIALIZE VIDEO LOADING
+  ========================================== */
+
+  useEffect(() => {
+    if (!isNearViewport) return;
+
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    if (video.networkState === HTMLMediaElement.NETWORK_EMPTY) {
+      video.load();
+    }
+  }, [isNearViewport, src, retryCount]);
+
+  /* ==========================================
      RETRY FAILED VIDEO
-  ======================================== */
+  ========================================== */
 
   function retryVideo() {
     const video = videoRef.current;
 
     if (!video) return;
 
-    setFailed(false);
-    setReady(false);
+    setFailedSrc(null);
+    setReadySrc(null);
+    setVisibleSrc(src ?? null);
+
     setRetryCount((count) => count + 1);
-    setIsNearViewport(true);
 
     video.load();
   }
-
-  const effectivePreload = isNearViewport ? preload : "none";
 
   return (
     <div
       ref={wrapperRef}
       className={`
-        group/video
-        relative isolate
+        group/video relative isolate
         aspect-video w-full
         overflow-hidden bg-[#08090C]
         ${wrapperClassName}
       `}
     >
-      {/* ====================================
-          ACTUAL VIDEO PLAYER
-      ==================================== */}
-
+      {/* ACTUAL VIDEO PLAYER */}
       <video
         {...props}
-        key={src}
+        key={typeof src === "string" ? src : undefined}
         ref={videoRef}
         src={src}
-        preload={effectivePreload}
+        preload={isNearViewport ? preload : "none"}
         playsInline={playsInline}
         controls={controls}
         className={`
-          relative z-10
-          block h-full w-full
+          relative z-10 block
+          h-full w-full
           bg-black object-contain
           ${className}
         `}
         onLoadedMetadata={(event) => {
-          setReady(true);
-          setFailed(false);
+          setReadySrc(src ?? null);
+          setFailedSrc(null);
           onLoadedMetadata?.(event);
         }}
         onLoadedData={(event) => {
-          setReady(true);
-          setFailed(false);
+          setReadySrc(src ?? null);
+          setFailedSrc(null);
           onLoadedData?.(event);
         }}
         onCanPlay={(event) => {
-          setReady(true);
-          setFailed(false);
+          setReadySrc(src ?? null);
+          setFailedSrc(null);
           onCanPlay?.(event);
         }}
         onError={(event) => {
-          setFailed(true);
-          setReady(false);
+          setFailedSrc(src ?? null);
+          setReadySrc(null);
           onError?.(event);
         }}
       />
 
-      {/* ====================================
-          LOADING STATE
-          Does not block video controls.
-      ==================================== */}
-
-      {!ready && !failed && (
+      {/* NON-BLOCKING LOADING INDICATOR */}
+      {!ready && !failed && hasSource && (
         <div
           aria-hidden="true"
           className="
             pointer-events-none
-            absolute inset-x-0 top-0
-            z-20 flex items-start
-            justify-end p-3
+            absolute inset-x-0 top-0 z-20
+            flex justify-end p-3
           "
         >
           <span
             className="
               flex items-center gap-2
               border border-white/10
-              bg-black/65
-              px-3 py-2
-
+              bg-black/65 px-3 py-2
               font-body text-[10px]
               uppercase tracking-wider
-              text-white/75
-              backdrop-blur-md
+              text-white/75 backdrop-blur-md
             "
           >
             <span
               className={`
-                h-1.5 w-1.5 rounded-full
+                h-1.5 w-1.5
+                rounded-full
+
                 ${
                   isNearViewport
                     ? "animate-pulse bg-red motion-reduce:animate-none"
@@ -228,32 +268,27 @@ export function LoadableVideo({
         </div>
       )}
 
-      {/* ====================================
-          ERROR FALLBACK
-      ==================================== */}
-
+      {/* ERROR FALLBACK */}
       {failed && (
         <div
           role="alert"
           className="
             absolute inset-0 z-30
-            flex flex-col
-            items-center justify-center
-            bg-[#08090C] p-5
-            text-center
+            flex flex-col items-center
+            justify-center
+            bg-[#08090C]
+            p-5 text-center
           "
         >
           <div
+            aria-hidden="true"
             className="
               flex h-12 w-12
               items-center justify-center
               rounded-full
-
               border border-red/40
-              bg-red/10
-              text-red
+              bg-red/10 text-red
             "
-            aria-hidden="true"
           >
             <svg
               width="24"
@@ -274,8 +309,7 @@ export function LoadableVideo({
           <p
             className="
               mt-3 font-heading
-              text-xs uppercase
-              text-white
+              text-xs uppercase text-white
             "
           >
             VIDEO UNAVAILABLE
@@ -285,8 +319,7 @@ export function LoadableVideo({
             className="
               mt-2 max-w-xs
               font-body text-xs
-              leading-relaxed
-              text-white/60
+              leading-relaxed text-white/60
             "
           >
             This clip could not be loaded. Please try again.
@@ -299,10 +332,8 @@ export function LoadableVideo({
               mt-4 min-h-10
               border border-red
               bg-red px-5 py-2
-
               font-heading text-[10px]
               uppercase text-white
-
               transition-colors
               hover:bg-red-deep
             "
@@ -317,21 +348,25 @@ export function LoadableVideo({
   );
 }
 
-/* ==========================================
-   LOADABLE IFRAME
-   YouTube embeds remain compatible.
-========================================== */
+/* =====================================================
+   03 / LOADABLE IFRAME
+===================================================== */
+
+type LoadableIframeProps = IframeHTMLAttributes<HTMLIFrameElement> & {
+  wrapperClassName?: string;
+};
 
 export function LoadableIframe({
   wrapperClassName = "",
   className = "",
   loading = "lazy",
   onLoad,
+  src,
   ...props
-}: React.IframeHTMLAttributes<HTMLIFrameElement> & {
-  wrapperClassName?: string;
-}) {
-  const [loaded, setLoaded] = useState(false);
+}: LoadableIframeProps) {
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+
+  const loaded = src != null && loadedSrc === src;
 
   return (
     <div
@@ -353,22 +388,18 @@ export function LoadableIframe({
 
       <iframe
         {...props}
+        src={src}
         loading={loading}
+        onLoad={(event) => {
+          setLoadedSrc(src ?? null);
+          onLoad?.(event);
+        }}
         className={`
           absolute inset-0
           h-full w-full
-
-          transition-opacity duration-500
-          motion-reduce:transition-none
-
-          ${loaded ? "opacity-100" : "opacity-0"}
-
+          bg-black
           ${className}
         `}
-        onLoad={(event) => {
-          setLoaded(true);
-          onLoad?.(event);
-        }}
       />
     </div>
   );

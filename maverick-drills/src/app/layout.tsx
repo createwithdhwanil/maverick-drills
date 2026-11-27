@@ -26,9 +26,29 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Maverick Drills",
+  title: {
+    default: "Maverick Drills | Beyond the Game",
+    template: "%s | Maverick Drills",
+  },
   description:
-    "Cinematic gameplay, gaming originals, screenshots and curated recommendations from Maverick Drills.",
+    "Discover cinematic gameplay, gaming originals, stunning screenshots and curated game recommendations from Maverick Drills.",
+  applicationName: "Maverick Drills",
+  openGraph: {
+    type: "website",
+    siteName: "Maverick Drills",
+    title: "Maverick Drills | Beyond the Game",
+    description:
+      "Cinematic gameplay, gaming originals and curated game discoveries.",
+  },
+  twitter: {
+    card: "summary",
+    title: "Maverick Drills | Beyond the Game",
+    description: "Go beyond the game with Maverick Drills.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -43,18 +63,20 @@ export default function RootLayout({
           ${bungee.variable}
           ${archivoBlack.variable}
           ${dmSans.variable}
-          antialiased
+          min-h-screen bg-background
+          text-foreground antialiased
         `}
       >
-        {/* One global cinematic audio background */}
+        {/* One global audio-reactive atmosphere */}
         <BeatReactiveBackground />
 
-        {/* Existing film-grain overlay */}
+        {/* Subtle cinematic film grain */}
         <div
           aria-hidden="true"
           className="
-            pointer-events-none fixed inset-0
-            z-[60] opacity-[0.035]
+            pointer-events-none
+            fixed inset-0 z-[60]
+            opacity-[0.035]
             mix-blend-overlay
           "
           style={{

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -21,10 +22,6 @@ import { ORIGINALS_VIDEOS, getYouTubeThumbnail } from "@/lib/data/originals";
 
 import type { SpotlightSlide } from "@/lib/data/spotlight";
 
-/* =====================================
-   TYPES
-===================================== */
-
 type HeroCta = {
   label: string;
   href: string;
@@ -42,12 +39,7 @@ type HeroSlide = {
 };
 
 const AUTO_ADVANCE_MS = 6500;
-
 const EASE = [0.22, 1, 0.36, 1] as const;
-
-/* =====================================
-   HERO COMPONENT
-===================================== */
 
 export default function Hero({
   spotlightSlides,
@@ -55,7 +47,7 @@ export default function Hero({
   spotlightSlides: SpotlightSlide[];
 }) {
   const heroRef = useRef<HTMLElement>(null);
-  const touchStartX = useRef<number | null>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -63,15 +55,10 @@ export default function Hero({
   const [heroVisible, setHeroVisible] = useState(true);
 
   const reduceMotion = useReducedMotion();
-
   const latestVideo = ORIGINALS_VIDEOS[0];
 
-  /* =====================================
-     SLIDE DATA
-  ===================================== */
-
   const slides = useMemo<HeroSlide[]>(() => {
-    const featuredGames: HeroSlide[] = spotlightSlides.map((slide) => ({
+    const featured: HeroSlide[] = spotlightSlides.map((slide) => ({
       id: slide.id,
       kicker: slide.kicker || "FEATURED DROP",
       title: slide.title,
@@ -87,45 +74,39 @@ export default function Hero({
       ],
     }));
 
-    if (!latestVideo) {
-      return featuredGames;
-    }
+    if (!latestVideo) return featured;
 
-    const uploadSlide: HeroSlide = {
-      id: "latest-upload",
-      kicker: "MAVERICK DRILLS / LATEST UPLOAD",
-      title: "GAMING CONTENT THAT HITS DIFFERENT.",
-      blurb:
-        "Original gameplay, exclusive moments, and the games worth your time. Straight from Maverick Drills.",
-      image: getYouTubeThumbnail(latestVideo.id),
-      ctas: [
-        {
-          label: "WATCH LATEST",
-          href: `https://www.youtube.com/watch?v=${latestVideo.id}`,
-          external: true,
-          kind: "primary",
-        },
-        {
-          label: "EXPLORE ORIGINALS",
-          href: "/originals",
-          kind: "secondary",
-        },
-      ],
-    };
-
-    return [...featuredGames, uploadSlide];
+    return [
+      ...featured,
+      {
+        id: "latest-upload",
+        kicker: "MAVERICK DRILLS / LATEST UPLOAD",
+        title: "GAMING CONTENT THAT HITS DIFFERENT.",
+        blurb:
+          "Original gameplay, exclusive moments, and the games worth your time. Straight from Maverick Drills.",
+        image: getYouTubeThumbnail(latestVideo.id),
+        ctas: [
+          {
+            label: "WATCH LATEST",
+            href: `https://www.youtube.com/watch?v=${latestVideo.id}`,
+            external: true,
+            kind: "primary",
+          },
+          {
+            label: "EXPLORE ORIGINALS",
+            href: "/originals",
+            kind: "secondary",
+          },
+        ],
+      },
+    ];
   }, [spotlightSlides, latestVideo]);
 
   const total = slides.length;
-
   const safeActive = total > 0 ? active % total : 0;
-
   const current = slides[safeActive];
 
-  /* =====================================
-     SCROLL PARALLAX
-  ===================================== */
-
+  // Parallax scroll motion.
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
@@ -137,34 +118,32 @@ export default function Hero({
 
   const scrollOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.35]);
 
-  /* =====================================
-     PAGE VISIBILITY
-  ===================================== */
-
+  // Pause when the browser tab is hidden.
   useEffect(() => {
-    const updateVisibility = () => {
+    const onVisibilityChange = () => {
       setPageVisible(!document.hidden);
     };
 
-    document.addEventListener("visibilitychange", updateVisibility);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      document.removeEventListener("visibilitychange", updateVisibility);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
 
+  // Pause autoplay when the Hero leaves the viewport.
   useEffect(() => {
     const element = heroRef.current;
 
-    if (!element) return;
+    if (!element || typeof IntersectionObserver === "undefined") {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         setHeroVisible(Boolean(entry?.isIntersecting));
       },
-      {
-        threshold: 0.1,
-      },
+      { threshold: 0.1 },
     );
 
     observer.observe(element);
@@ -172,45 +151,29 @@ export default function Hero({
     return () => observer.disconnect();
   }, []);
 
-  /* =====================================
-     AUTO ADVANCE
-  ===================================== */
-
+  // Pause while hovering, focusing controls, or offscreen.
   useEffect(() => {
     if (paused || !pageVisible || !heroVisible || reduceMotion || total <= 1) {
       return;
     }
 
-    const timer = window.setInterval(() => {
+    const timer = window.setTimeout(() => {
       setActive((index) => (index + 1) % total);
     }, AUTO_ADVANCE_MS);
 
-    return () => window.clearInterval(timer);
+    return () => window.clearTimeout(timer);
   }, [paused, pageVisible, heroVisible, reduceMotion, total, safeActive]);
 
-  /* =====================================
-     CAROUSEL NAVIGATION
-  ===================================== */
-
-  const goTo = (index: number) => {
+  function goTo(index: number) {
     if (total <= 0) return;
 
     setActive(((index % total) + total) % total);
-  };
-
-  /* =====================================
-     EMPTY STATE
-  ===================================== */
+  }
 
   if (!current) return null;
 
   const slideNumber = String(safeActive + 1).padStart(2, "0");
-
   const totalNumber = String(total).padStart(2, "0");
-
-  /* =====================================
-     MOTION CONFIG
-  ===================================== */
 
   const contentTransition = {
     duration: reduceMotion ? 0 : 0.65,
@@ -223,8 +186,7 @@ export default function Hero({
       aria-label="Featured games and videos"
       aria-roledescription="carousel"
       className="
-        relative isolate
-        overflow-hidden bg-background
+        relative isolate overflow-hidden bg-background
       "
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -235,20 +197,32 @@ export default function Hero({
         }
       }}
       onTouchStart={(event) => {
-        touchStartX.current = event.touches[0]?.clientX ?? null;
+        const touch = event.touches[0];
+
+        if (touch) {
+          touchStart.current = {
+            x: touch.clientX,
+            y: touch.clientY,
+          };
+        }
       }}
       onTouchEnd={(event) => {
-        if (touchStartX.current === null) return;
+        const start = touchStart.current;
+        const touch = event.changedTouches[0];
 
-        const endX = event.changedTouches[0]?.clientX;
+        touchStart.current = null;
 
-        const difference = endX === undefined ? 0 : touchStartX.current - endX;
+        if (!start || !touch) return;
 
-        touchStartX.current = null;
+        const dx = start.x - touch.clientX;
+        const dy = start.y - touch.clientY;
 
-        if (Math.abs(difference) > 60) {
-          goTo(safeActive + (difference > 0 ? 1 : -1));
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+          goTo(safeActive + (dx > 0 ? 1 : -1));
         }
+      }}
+      onTouchCancel={() => {
+        touchStart.current = null;
       }}
       tabIndex={0}
       onKeyDown={(event) => {
@@ -267,15 +241,12 @@ export default function Hero({
         }
       }}
     >
-      {/* =====================================
-          ANIMATED CINEMATIC BACKGROUND
-      ===================================== */}
-
+      {/* OPTIMIZED CINEMATIC BACKGROUND */}
       <motion.div
         aria-hidden="true"
         className="
-          pointer-events-none
-          absolute -inset-y-16 inset-x-0
+          pointer-events-none absolute
+          -inset-y-16 inset-x-0
           z-0 overflow-hidden
         "
         style={{
@@ -286,20 +257,13 @@ export default function Hero({
           <motion.div
             key={current.id}
             initial={
-              reduceMotion
-                ? { opacity: 1 }
-                : {
-                    opacity: 0,
-                    scale: 1.08,
-                  }
+              reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 1.08 }
             }
             animate={{
               opacity: 1,
               scale: 1,
             }}
-            exit={{
-              opacity: 0,
-            }}
+            exit={{ opacity: 0 }}
             transition={{
               opacity: {
                 duration: reduceMotion ? 0 : 0.85,
@@ -309,19 +273,25 @@ export default function Hero({
                 ease: EASE,
               },
             }}
-            className="
-              absolute inset-0
-              bg-cover
-            "
-            style={{
-              backgroundImage: `url("${current.image}")`,
-              backgroundPosition:
-                current.id === "latest-upload" ? "center center" : "65% center",
-            }}
-          />
+            className="absolute inset-0 overflow-hidden"
+          >
+            <Image
+              src={current.image}
+              alt=""
+              fill
+              priority={safeActive === 0}
+              sizes="100vw"
+              quality={75}
+              className="object-cover"
+              style={{
+                objectPosition:
+                  current.id === "latest-upload"
+                    ? "center center"
+                    : "65% center",
+              }}
+            />
+          </motion.div>
         </AnimatePresence>
-
-        {/* LEFT CINEMATIC GRADIENT */}
 
         <div
           className="
@@ -332,8 +302,6 @@ export default function Hero({
             to-transparent
           "
         />
-
-        {/* BOTTOM FADE */}
 
         <div
           className="
@@ -346,8 +314,7 @@ export default function Hero({
         />
       </motion.div>
 
-      {/* SUBTLE ATMOSPHERIC LIGHT */}
-
+      {/* ATMOSPHERIC RED LIGHT */}
       <div
         aria-hidden="true"
         className="
@@ -358,10 +325,7 @@ export default function Hero({
         "
       />
 
-      {/* =====================================
-          MAIN HERO CONTENT
-      ===================================== */}
-
+      {/* MAIN HERO CONTENT */}
       <motion.div
         className="
           relative z-10
@@ -375,7 +339,6 @@ export default function Hero({
           lg:min-h-[700px] lg:px-12
 
           2xl:max-w-[1536px]
-
           min-[2000px]:max-w-[1760px]
           min-[2000px]:min-h-[760px]
           min-[2000px]:px-16
@@ -396,39 +359,20 @@ export default function Hero({
             <motion.div
               key={current.id}
               className="
-                flex w-full flex-col
-                items-start
+                flex w-full flex-col items-start
               "
-              initial={
-                reduceMotion
-                  ? { opacity: 1 }
-                  : {
-                      opacity: 0,
-                      y: 24,
-                    }
-              }
+              initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
               animate={{
                 opacity: 1,
                 y: 0,
               }}
-              exit={
-                reduceMotion
-                  ? { opacity: 0 }
-                  : {
-                      opacity: 0,
-                      y: -16,
-                    }
-              }
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -16 }}
               transition={contentTransition}
             >
               {/* FEATURED BADGE */}
-
               <motion.span
                 initial={reduceMotion ? false : { opacity: 0, x: -20 }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{
                   duration: reduceMotion ? 0 : 0.5,
                   delay: reduceMotion ? 0 : 0.12,
@@ -439,34 +383,21 @@ export default function Hero({
                   items-center clip-corner-sm
                   bg-red/95 px-4 py-2
 
-                  font-heading
-                  text-[10px] uppercase
-                  tracking-[0.08em]
+                  font-heading text-[10px]
+                  uppercase tracking-[0.08em]
                   text-white
 
                   shadow-[0_0_25px_rgba(229,9,36,0.25)]
-
                   sm:text-xs
                 "
               >
                 {current.kicker}
               </motion.span>
 
-              {/* CINEMATIC GAME TITLE */}
-
+              {/* TITLE */}
               <motion.h1
-                initial={
-                  reduceMotion
-                    ? false
-                    : {
-                        opacity: 0,
-                        y: 35,
-                      }
-                }
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
+                initial={reduceMotion ? false : { opacity: 0, y: 35 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: reduceMotion ? 0 : 0.8,
                   delay: reduceMotion ? 0 : 0.18,
@@ -474,17 +405,15 @@ export default function Hero({
                 }}
                 className="
                   w-full max-w-[820px]
-
+                  break-words
                   font-display font-black
                   uppercase text-white
-                  break-words
 
                   text-[clamp(2.4rem,5vw,6.5rem)]
                   leading-[1.05]
                   tracking-[-0.05em]
 
                   sm:leading-[0.98]
-
                   [text-shadow:0_4px_30px_rgba(0,0,0,0.45)]
                 "
               >
@@ -492,20 +421,9 @@ export default function Hero({
               </motion.h1>
 
               {/* DESCRIPTION */}
-
               <motion.p
-                initial={
-                  reduceMotion
-                    ? false
-                    : {
-                        opacity: 0,
-                        y: 20,
-                      }
-                }
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: reduceMotion ? 0 : 0.65,
                   delay: reduceMotion ? 0 : 0.3,
@@ -516,36 +434,23 @@ export default function Hero({
                   font-body text-sm
                   leading-relaxed text-white/85
 
-                  sm:text-base
-                  lg:text-lg
+                  sm:text-base lg:text-lg
                 "
               >
                 {current.blurb}
               </motion.p>
 
-              {/* ANIMATED CTA BUTTONS */}
-
+              {/* CTA BUTTONS */}
               <motion.div
-                initial={
-                  reduceMotion
-                    ? false
-                    : {
-                        opacity: 0,
-                        y: 20,
-                      }
-                }
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: reduceMotion ? 0 : 0.6,
                   delay: reduceMotion ? 0 : 0.42,
                   ease: EASE,
                 }}
                 className="
-                  mt-9 flex w-full
-                  flex-wrap gap-3
+                  mt-9 flex w-full flex-wrap gap-3
                 "
               >
                 {current.ctas.map((cta) => {
@@ -558,13 +463,10 @@ export default function Hero({
                     gap-2 clip-corner-sm
 
                     px-5 py-3 sm:px-7
-
                     font-heading text-[11px]
-                    uppercase tracking-wide
-                    sm:text-xs
+                    uppercase tracking-wide sm:text-xs
 
                     transition-all duration-300
-
                     hover:-translate-y-0.5
 
                     ${
@@ -614,14 +516,10 @@ export default function Hero({
         </div>
       </motion.div>
 
-      {/* =====================================
-          BOTTOM CAROUSEL CONTROLS
-      ===================================== */}
-
+      {/* CAROUSEL CONTROLS */}
       <div
         className="
-          absolute inset-x-0
-          bottom-9 z-30
+          absolute inset-x-0 bottom-9 z-30
           sm:bottom-6
         "
       >
@@ -629,23 +527,18 @@ export default function Hero({
           className="
             mx-auto flex w-full max-w-7xl
             items-center justify-between
-            gap-3
+            gap-3 px-5
 
-            px-5 sm:px-8 lg:px-12
-
+            sm:px-8 lg:px-12
             2xl:max-w-[1536px]
-
             min-[2000px]:max-w-[1760px]
             min-[2000px]:px-16
           "
         >
-          {/* COUNTER AND INDICATORS */}
-
           <div
             className="
-              flex min-w-0
-              items-center gap-3
-              sm:gap-4
+              flex min-w-0 items-center
+              gap-3 sm:gap-4
             "
           >
             <span
@@ -657,13 +550,13 @@ export default function Hero({
               "
             >
               {slideNumber}
-
               <span className="text-white/50">
                 {" / "}
                 {totalNumber}
               </span>
             </span>
 
+            {/* SLIDE INDICATORS */}
             <div className="flex items-center gap-2">
               {slides.map((slide, index) => {
                 const isActive = index === safeActive;
@@ -701,10 +594,13 @@ export default function Hero({
             </div>
           </div>
 
-          {/* NAVIGATION ARROWS */}
-
+          {/* PREVIOUS / NEXT */}
           {total > 1 && (
-            <div className="flex shrink-0 items-center gap-3">
+            <div
+              className="
+                flex shrink-0 items-center gap-3
+              "
+            >
               <motion.button
                 type="button"
                 onClick={() => goTo(safeActive - 1)}
@@ -714,16 +610,12 @@ export default function Hero({
                 className="
                   flex h-11 w-11
                   items-center justify-center
-
-                  rounded-full
-                  border border-white/40
-
+                  rounded-full border border-white/40
                   bg-black/70 text-white
                   backdrop-blur-lg
 
                   transition-colors duration-200
-                  hover:border-red
-                  hover:bg-red
+                  hover:border-red hover:bg-red
                 "
               >
                 <ChevronLeftIcon className="h-5 w-5" />
@@ -738,16 +630,12 @@ export default function Hero({
                 className="
                   flex h-11 w-11
                   items-center justify-center
-
-                  rounded-full
-                  border border-white/40
-
+                  rounded-full border border-white/40
                   bg-black/70 text-white
                   backdrop-blur-lg
 
                   transition-colors duration-200
-                  hover:border-red
-                  hover:bg-red
+                  hover:border-red hover:bg-red
                 "
               >
                 <ChevronRightIcon className="h-5 w-5" />
