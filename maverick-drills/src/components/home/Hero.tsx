@@ -60,6 +60,7 @@ export default function Hero({
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
+  const [heroVisible, setHeroVisible] = useState(true);
 
   const reduceMotion = useReducedMotion();
 
@@ -152,12 +153,31 @@ export default function Hero({
     };
   }, []);
 
+  useEffect(() => {
+    const element = heroRef.current;
+
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setHeroVisible(Boolean(entry?.isIntersecting));
+      },
+      {
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
+
   /* =====================================
      AUTO ADVANCE
   ===================================== */
 
   useEffect(() => {
-    if (paused || !pageVisible || reduceMotion || total <= 1) {
+    if (paused || !pageVisible || !heroVisible || reduceMotion || total <= 1) {
       return;
     }
 
@@ -166,7 +186,7 @@ export default function Hero({
     }, AUTO_ADVANCE_MS);
 
     return () => window.clearInterval(timer);
-  }, [paused, pageVisible, reduceMotion, total, safeActive]);
+  }, [paused, pageVisible, heroVisible, reduceMotion, total, safeActive]);
 
   /* =====================================
      CAROUSEL NAVIGATION
@@ -228,6 +248,22 @@ export default function Hero({
 
         if (Math.abs(difference) > 60) {
           goTo(safeActive + (difference > 0 ? 1 : -1));
+        }
+      }}
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) {
+          return;
+        }
+
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          goTo(safeActive + 1);
+        }
+
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          goTo(safeActive - 1);
         }
       }}
     >

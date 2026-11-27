@@ -438,13 +438,33 @@ export default function MonthlyPicksExperience({ month, picks }: Props) {
                         <AnimatePresence mode="wait" initial={false}>
                           {locked ? (
                             <motion.div
-                              key="mystery"
-                              initial={{ opacity: 0, y: 12 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -12 }}
-                              transition={{
-                                duration: reduceMotion ? 0 : 0.4,
+                              initial={
+                                reduceMotion
+                                  ? false
+                                  : {
+                                      opacity: 0,
+                                      scale: 0.9,
+                                    }
+                              }
+                              animate={{
+                                opacity: 1,
+                                scale: 1,
                               }}
+                              transition={{
+                                duration: reduceMotion ? 0 : 0.55,
+                                ease: EASE,
+                              }}
+                              className="
+    flex h-20 w-20
+    items-center justify-center
+    rounded-full
+
+    border border-red/50
+    bg-black/70
+    backdrop-blur-xl
+
+    shadow-[0_0_34px_rgba(229,9,36,0.17)]
+  "
                             >
                               <h3
                                 className="
