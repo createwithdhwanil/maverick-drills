@@ -6,6 +6,8 @@ const AUDIO_SOURCE =
   "/public/audio/Unknown Brain - Superhero (feat. Chris Linton) Trap NCS - Copyright Free Music.mp3";
 const DEFAULT_VOLUME = 0.4;
 
+const AUDIO_TIMEOUT_MS = 15000;
+
 export default function BeatReactiveBackground() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const atmosphereRef = useRef<HTMLDivElement>(null);
@@ -14,8 +16,9 @@ export default function BeatReactiveBackground() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const frameRef = useRef<number | null>(null);
 
-  const playbackPendingRef = useRef(false);
+  const pendingRef = useRef(false);
   const mountedRef = useRef(false);
+  const visualizerRunningRef = useRef(false);
 
   const [playing, setPlaying] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -23,7 +26,13 @@ export default function BeatReactiveBackground() {
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [error, setError] = useState<string | null>(null);
 
+  /* ==========================================
+     VISUALIZER RESET
+  ========================================== */
+
   const stopVisualizer = useCallback(() => {
+    visualizerRunningRef.current = false;
+
     if (frameRef.current !== null) {
       cancelAnimationFrame(frameRef.current);
       frameRef.current = null;
@@ -38,24 +47,67 @@ export default function BeatReactiveBackground() {
     }
   }, []);
 
+  /* ==========================================
+     WEB AUDIO ANALYSER
+  ========================================== */
+
+  const prepareAudioGraph = useCallback(() => {
+    const audio = audioRef.current;
+
+    if (!audio) return null;
+
+    if (contextRef.current) {
+      return contextRef.current;
+    }
+
+    const AudioContextClass = window.AudioContext;
+
+    if (!AudioContextClass) {
+      return null;
+    }
+
+    const context = new AudioContextClass();
+
+    const analyser = context.createAnalyser();
+
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0.76;
+
+    const source = context.createMediaElementSource(audio);
+
+    source.connect(analyser);
+    analyser.connect(context.destination);
+
+    contextRef.current = context;
+    analyserRef.current = analyser;
+
+    return context;
+  }, []);
+
+  /* ==========================================
+     AUDIO REACTIVE ANIMATION
+  ========================================== */
+
   const startVisualizer = useCallback(() => {
-    if (frameRef.current !== null) return;
+    if (visualizerRunningRef.current) return;
 
     const analyser = analyserRef.current;
     const atmosphere = atmosphereRef.current;
 
     if (!analyser || !atmosphere) return;
 
+    visualizerRunningRef.current = true;
+
     const frequencies = new Uint8Array(analyser.frequencyBinCount);
 
     let smoothBass = 0;
     let smoothEnergy = 0;
-    let baseline = 0.12;
+    let baseline = 0.1;
     let beatFlash = 0;
     let lastBeat = 0;
 
-    function animate(time: number) {
-      if (!analyser || !atmosphere) return;
+    const animate = (time: number) => {
+      if (!visualizerRunningRef.current) return;
 
       analyser.getByteFrequencyData(frequencies);
 
@@ -78,12 +130,15 @@ export default function BeatReactiveBackground() {
 
       baseline += (bass - baseline) * 0.015;
 
-      if (bass > 0.22 && bass > baseline * 1.32 && time - lastBeat > 220) {
+      const beatDetected =
+        bass > 0.2 && bass > baseline * 1.25 && time - lastBeat > 230;
+
+      if (beatDetected) {
         lastBeat = time;
         beatFlash = 1;
       }
 
-      beatFlash *= 0.88;
+      beatFlash *= 0.87;
 
       atmosphere.style.setProperty("--md-bass", smoothBass.toFixed(3));
 
@@ -92,86 +147,106 @@ export default function BeatReactiveBackground() {
       atmosphere.style.setProperty("--md-beat", beatFlash.toFixed(3));
 
       frameRef.current = requestAnimationFrame(animate);
-    }
+    };
 
     frameRef.current = requestAnimationFrame(animate);
   }, []);
 
-  const prepareAudioGraph = useCallback(() => {
+  /* ==========================================
+     START PLAYBACK
+  ========================================== */
+
+  async function togglePlayback() {
     const audio = audioRef.current;
 
-    if (!audio) {
-      throw new Error("Audio element is unavailable.");
-    }
-
-    if (contextRef.current) {
-      return contextRef.current;
-    }
-
-    const context = new AudioContext();
-    const analyser = context.createAnalyser();
-
-    analyser.fftSize = 1024;
-    analyser.smoothingTimeConstant = 0.76;
-
-    const source = context.createMediaElementSource(audio);
-
-    source.connect(analyser);
-    analyser.connect(context.destination);
-
-    contextRef.current = context;
-    analyserRef.current = analyser;
-
-    return context;
-  }, []);
-
-  const togglePlayback = async () => {
-    const audio = audioRef.current;
-
-    if (!audio || playbackPendingRef.current) return;
+    if (!audio || pendingRef.current) return;
 
     if (!audio.paused) {
       audio.pause();
       return;
     }
 
-    playbackPendingRef.current = true;
+    pendingRef.current = true;
+
     setBusy(true);
     setError(null);
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     try {
-      const context = prepareAudioGraph();
-
-      // Start both operations from the click gesture.
-      const resumePromise = context.resume();
+      // Start playback directly from the click.
+      // Do not wait for AudioContext.resume().
       const playPromise = audio.play();
 
-      // Prevent a permanently stuck loading button.
-      const timeout = new Promise<never>((_, reject) => {
+      // Set up the analyser after initiating playback,
+      // while still inside the user interaction.
+      let resumePromise: Promise<void> | null = null;
+
+      try {
+        const context = prepareAudioGraph();
+
+        if (context) {
+          resumePromise = context.resume();
+        }
+      } catch (graphError) {
+        // Audio can still be played even if the
+        // visualizer isn't available.
+        console.warn("Audio visualizer unavailable:", graphError);
+      }
+
+      // Don't let a stalled network request keep
+      // the control in LOADING indefinitely.
+      const timeoutPromise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
-          reject(new Error("Audio loading timed out. Check the MP3 response."));
-        }, 8000);
+          reject(
+            new Error("Soundtrack loading timed out. Verify the MP3 file."),
+          );
+        }, AUDIO_TIMEOUT_MS);
       });
 
-      await Promise.race([Promise.all([resumePromise, playPromise]), timeout]);
+      // Only wait for actual media playback.
+      await Promise.race([playPromise, timeoutPromise]);
 
-      if (mountedRef.current) {
-        setPlaying(true);
-        startVisualizer();
+      if (!mountedRef.current) return;
+
+      setPlaying(true);
+      setBusy(false);
+
+      // Resume analysis without blocking playback.
+      if (resumePromise) {
+        void resumePromise
+          .then(() => {
+            if (mountedRef.current && !audio.paused) {
+              startVisualizer();
+            }
+          })
+          .catch((graphError) => {
+            console.warn("Audio analysis could not start:", graphError);
+          });
       }
     } catch (caught) {
-      const message =
-        caught instanceof Error ? caught.message : "Unknown audio error";
+      const playbackError =
+        caught instanceof Error ? caught : new Error("Unknown audio error");
 
-      console.error("Maverick audio error:", caught);
+      console.error("Maverick audio playback failed:", playbackError);
 
       audio.pause();
       stopVisualizer();
 
+      let message = playbackError.message;
+
+      if (playbackError.name === "NotSupportedError") {
+        message =
+          "This audio format isn't supported. Check or re-encode maverick-theme.mp3.";
+      } else if (playbackError.name === "NotAllowedError") {
+        message = "Browser blocked playback. Please press Play again.";
+      } else if (playbackError.name === "AbortError") {
+        message = "Audio playback was interrupted. Try again.";
+      }
+
       if (mountedRef.current) {
         setPlaying(false);
+        setBusy(false);
         setError(message);
         setExpanded(true);
       }
@@ -180,16 +255,20 @@ export default function BeatReactiveBackground() {
         clearTimeout(timeoutId);
       }
 
-      playbackPendingRef.current = false;
+      pendingRef.current = false;
 
       if (mountedRef.current) {
         setBusy(false);
       }
     }
-  };
+  }
+
+  /* ==========================================
+     VOLUME
+  ========================================== */
 
   function changeVolume(value: number) {
-    const next = Math.min(1, Math.max(0, value));
+    const next = Math.max(0, Math.min(1, value));
 
     setVolume(next);
 
@@ -198,20 +277,25 @@ export default function BeatReactiveBackground() {
     }
   }
 
+  /* ==========================================
+     LIFECYCLE
+  ========================================== */
+
   useEffect(() => {
     mountedRef.current = true;
 
     const audio = audioRef.current;
 
-    if (!audio) return;
+    if (audio) {
+      audio.volume = DEFAULT_VOLUME;
+    }
 
-    audio.volume = DEFAULT_VOLUME;
-
-    function onVisibilityChange() {
+    const onVisibilityChange = () => {
       if (document.hidden) {
         audio?.pause();
+        stopVisualizer();
       }
-    }
+    };
 
     document.addEventListener("visibilitychange", onVisibilityChange);
 
@@ -220,32 +304,28 @@ export default function BeatReactiveBackground() {
 
       document.removeEventListener("visibilitychange", onVisibilityChange);
 
-      audio.pause();
+      audio?.pause();
+      stopVisualizer();
 
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current);
-        frameRef.current = null;
-      }
-
-      const context = contextRef.current;
-
-      contextRef.current = null;
-      analyserRef.current = null;
-
-      if (context && context.state !== "closed") {
-        void context.close().catch(() => {});
-      }
+      // Keep the existing AudioContext reference here.
+      // Closing and recreating it during React Strict
+      // Mode effect replays can break MediaElementSource.
+      // The browser releases it when the page unloads.
     };
-  }, []);
+  }, [stopVisualizer]);
+
+  /* ==========================================
+     UI
+  ========================================== */
 
   return (
     <>
-      {/* GLOBAL REACTIVE BACKGROUND */}
+      {/* GLOBAL MUSIC REACTIVE BACKGROUND */}
       <div
         ref={atmosphereRef}
-        className="md-beat-atmosphere"
-        data-beat-active={playing}
         aria-hidden="true"
+        data-beat-active={playing}
+        className="md-beat-atmosphere"
       >
         <div className="md-beat-atmosphere__grid" />
 
@@ -258,29 +338,46 @@ export default function BeatReactiveBackground() {
         <div className="md-beat-atmosphere__streak" />
       </div>
 
-      {/* MUSIC */}
+      {/* SOUNDTRACK */}
       <audio
         ref={audioRef}
         src={AUDIO_SOURCE}
-        preload="metadata"
+        preload="none"
         loop
-        onPlay={() => {
+        onPlaying={() => {
           setPlaying(true);
-          startVisualizer();
+          setBusy(false);
+
+          if (contextRef.current?.state === "running") {
+            startVisualizer();
+          }
         }}
         onPause={() => {
           setPlaying(false);
           stopVisualizer();
         }}
-        onError={() => {
+        onEnded={() => {
           setPlaying(false);
           stopVisualizer();
+        }}
+        onError={(event) => {
+          const mediaError = event.currentTarget.error;
 
-          setError("Unable to load the soundtrack. Check the MP3 file.");
+          const message =
+            mediaError?.message || "The soundtrack could not be loaded.";
+
+          console.error("Maverick media error:", mediaError?.code, message);
+
+          setError(message);
+          setBusy(false);
+          setPlaying(false);
+          setExpanded(true);
+
+          stopVisualizer();
         }}
       />
 
-      {/* FLOATING AUDIO CONTROLS */}
+      {/* FLOATING MUSIC PLAYER */}
       <div className="md-sound-control">
         {expanded && (
           <div id="md-sound-settings" className="md-sound-control__panel">
@@ -330,7 +427,7 @@ export default function BeatReactiveBackground() {
             {error && (
               <p
                 role="alert"
-                className="mt-3 font-body text-xs leading-relaxed text-red"
+                className="mt-4 border-l-2 border-red pl-3 font-body text-xs leading-relaxed text-white/75"
               >
                 {error}
               </p>
@@ -339,12 +436,13 @@ export default function BeatReactiveBackground() {
         )}
 
         <div className="md-sound-control__actions">
+          {/* SETTINGS */}
           <button
             type="button"
+            onClick={() => setExpanded((previous) => !previous)}
             aria-label="Music settings"
             aria-expanded={expanded}
-            aria-controls="md-sound-settings"
-            onClick={() => setExpanded((value) => !value)}
+            aria-controls={expanded ? "md-sound-settings" : undefined}
             className="md-sound-control__settings"
           >
             <svg
@@ -355,7 +453,6 @@ export default function BeatReactiveBackground() {
               stroke="currentColor"
               strokeWidth="1.8"
               strokeLinecap="round"
-              strokeLinejoin="round"
               aria-hidden="true"
             >
               <path d="M4 7h16M4 17h16" />
@@ -364,10 +461,11 @@ export default function BeatReactiveBackground() {
             </svg>
           </button>
 
+          {/* PLAY / PAUSE */}
           <button
             type="button"
-            disabled={busy}
             onClick={togglePlayback}
+            disabled={busy}
             aria-label={
               playing ? "Pause background music" : "Play background music"
             }
